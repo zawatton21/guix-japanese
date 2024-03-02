@@ -211,18 +211,16 @@ standard library.")
                                                (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                (getenv "PKG_CONFIG_PATH"))
                                          ":"))
-                                #t))                              
-                     (delete 'check)
-                     (replace 'build
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                (define out (assoc-ref outputs "out"))
-                                (define mozc-dir (string-append out "/lib/mozc"))
-                                (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
 
                                 (chdir "src")
                                 (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
                                 ;; bazelビルドスクリプトの実行
                                 (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
+                                #t))                              
+                     (delete 'check)
+                     (replace 'build
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                ;; bazelビルドスクリプトの実行
                                 (invoke "python3" "build_mozc.py" "build" "-c" "Release" "gui/gui.gyp:mozc_tool")
                                 #t))
                      (add-before 'install 'copy-image-package
