@@ -258,7 +258,7 @@ standard library.")
                                               (string-append out "/lib/ibus-mozc/ibus-engine-mozc --xml"))
                                              (("0.0.0.0")(version)))
                                      
-                                (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml")))
+                                (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
                               #t))
       (add-after 'install 'install-and-modify-desktop-files
                  (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -287,7 +287,8 @@ standard library.")
                        (substitute* destination-file
                                     (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
                                      (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                     #t))))))
+                     #t)))
+                     )))
   (native-inputs
    `(("mozc-debian-patches" ,mozc-debian-patches)
      ("ninja" ,ninja)
@@ -322,67 +323,52 @@ standard library.")
    (synopsis "japanese input method from google")
    (description "this package provides the mozc input method for japanese, developed by google.")
    (home-page "https://github.com/google/mozc")
-   (license gpl3+))
+   (license gpl3+)))
 
-(use-modules (guix packages)
-             (guix download)
-             (guix git-download)
-             (guix utils)
-             (guix build-system gnu)
-             (gnu packages)
-             (gnu packages language)
-             (gnu packages autotools)
-             (gnu packages base)
-             (gnu packages glib)
-             (gnu packages gnome)
-             (gnu packages gtk)
-             (gnu packages pkg-config)
-             (gnu packages ibus)
-             (guix licenses))
-
-(package
-  (name "ibus-skk")
-  (version "1.4.3")
+(define-public ibus-skk
+  (package
+   (name "ibus-skk")
+   (version "1.4.3")
   (source (origin
-              (method git-fetch)
-  	      (uri (git-reference
-  		     (url "https://github.com/ueno/ibus-skk.git")
-		     (commit "ibus-skk-1.4.3")))
-              (sha256
-               (base32
-	         "19s8m6dsyd90jlwd4vqgwvs7rfsjcvb83wh0k3bxx7sxqz7wyk11"))))
+           (method git-fetch)
+  	   (uri (git-reference
+  		 (url "https://github.com/ueno/ibus-skk.git")
+		 (commit "ibus-skk-1.4.3")))
+           (sha256
+            (base32
+	     "19s8m6dsyd90jlwd4vqgwvs7rfsjcvb83wh0k3bxx7sxqz7wyk11"))))
   (build-system gnu-build-system)
   (arguments
    `(#:phases
      (modify-phases %standard-phases
-       ;; Modify src/skk.xml.in.in. Set the Keyboard layout to default. 
-       (add-after 'unpack 'modify-skk-xml
-         (lambda _
-           (substitute* "src/skk.xml.in.in"
-             (("<layout>jp</layout>")
-              "<layout>default</layout>"))
-           #t))
-       ;; Change encoding in src/engine.vala
-       (add-after 'unpack 'modify-engine-vala
-         (lambda _
-           (substitute* "src/engine.vala"
-             (("var encoding = plist.get \\(\"encoding\"\\) \\?\\? \"EUC-JP\";")
-              "var encoding = plist.get (\"encoding\") ?? \"UTF-8\";"))
-           #t))
-        ;; Modify src/preferences.vala for dictionary path
-        (add-after 'unpack 'modify-preferences-vala
-         (lambda _
-           (substitute* "src/preferences.vala"
-             (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly\"")
-              "type=file,file=/home/madblack-21/.guix-profile/share/skk/SKK-JISYO.L,mode=readonly\""))
-           #t))
-
-       ;; Generate a configure file
-       (add-before 'configure 'pre-configure
-         (lambda _ ; TODO: add explanation
-           (zero? (system* "sh" "./autogen.sh")))))))
+                    ;; Modify src/skk.xml.in.in. Set the Keyboard layout to default. 
+                    (add-after 'unpack 'modify-skk-xml
+                               (lambda _
+                                 (substitute* "src/skk.xml.in.in"
+                                              (("<layout>jp</layout>")
+                                               "<layout>default</layout>"))
+                                 #t))
+                    ;; Change encoding in src/engine.vala
+                    (add-after 'unpack 'modify-engine-vala
+                               (lambda _
+                                 (substitute* "src/engine.vala"
+                                              (("var encoding = plist.get \\(\"encoding\"\\) \\?\\? \"EUC-JP\";")
+                                               "var encoding = plist.get (\"encoding\") ?? \"UTF-8\";"))
+                                 #t))
+                    ;; Modify src/preferences.vala for dictionary path
+                    (add-after 'unpack 'modify-preferences-vala
+                               (lambda _
+                                 (substitute* "src/preferences.vala"
+                                              (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly\"")
+                                               "type=file,file=/home/madblack-21/.guix-profile/share/skk/SKK-JISYO.L,mode=readonly\""))
+                                 #t))
+                    
+                    ;; Generate a configure file
+                    (add-before 'configure 'pre-configure
+                                (lambda _ ; TODO: add explanation
+                                  (zero? (system* "sh" "./autogen.sh")))))))
   (propagated-inputs
-     (list libskk))
+   (list libskk))
   (native-inputs
    `(("libgee" ,libgee)
      ("libskk" ,libskk)
@@ -406,4 +392,4 @@ standard library.")
   (synopsis "ibus skk")
   (description "test")
   (home-page "https://github.com/ueno/ibus-skk")
-  (license gpl2+))
+  (license gpl2+)))
