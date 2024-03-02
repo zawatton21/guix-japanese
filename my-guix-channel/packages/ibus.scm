@@ -314,8 +314,6 @@ standard library.")
     (inherit mozc-tool)
     (name "ibus-mozc")
     (arguments
-    `(#:phases
-      (modify-phases %standard-phases
     `(#:modules ((guix build gnu-build-system)
                  (guix build utils)
                  (srfi srfi-1) ;; List操作のため
@@ -426,15 +424,13 @@ standard library.")
                                   (substitute* destination-file
                                                (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
                                                 (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                                #t))))))))))
+                                #t))))))))
 
 (define-public mozc-emacs-helper
   (package
     (inherit mozc-tool)
     (name "mozc-emacs-helper")
     (arguments
-    `(#:phases
-      (modify-phases %standard-phases
     `(#:modules ((guix build gnu-build-system)
                  (guix build utils)
                  (srfi srfi-1) ;; List操作のため
@@ -512,7 +508,7 @@ standard library.")
                                 (mkdir-p bin-dir)
                                 ;; 実行ファイルやリソースファイルのコピー
                                 (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
-                                #t))))))))))
+                                #t))))))))
 
 (define-public ibus-skk
   (package
