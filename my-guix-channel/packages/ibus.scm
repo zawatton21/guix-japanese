@@ -200,14 +200,19 @@ standard library.")
                                 (define qttools-bin (string-append (assoc-ref %build-inputs "qttools") "/bin"))
                                 (define gettext-bin (string-append (assoc-ref %build-inputs "gettext") "/bin"))
                                 (define gtk2-bin (string-append (assoc-ref %build-inputs "gtk+") "/bin"))
+                                (define fcitx-bin (string-append (assoc-ref %build-inputs "fcitx") "/bin"))
+                                (define fcitx5-bin (string-append (assoc-ref %build-inputs "fcitx5") "/bin"))
+                                (define uim-bin (string-append (assoc-ref %build-inputs "uim") "/bin"))
+
                                 (setenv "HOME" (getcwd)) ;; 現在の作業ディレクトリをホームディレクトリとして設定
                                 (setenv "PYTHON_BIN_PATH" (string-append (assoc-ref %build-inputs "python") "/bin"))
                                 ;; 環境変数pathにjdkのbinディレクトリと他のツールのパスを追加
-                                (setenv "PATH" (string-join (list gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
+                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
                                 (setenv "PKG_CONFIG_PATH"
                                         (string-join
                                          (list (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
                                                (string-append (assoc-ref inputs "qttools") "/lib/pkgconfig")
+                                               (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                (getenv "PKG_CONFIG_PATH"))
                                          ":"))
                                 (chdir "src")
@@ -308,7 +313,10 @@ standard library.")
       ("grep" ,grep)
       ("sed" ,sed)
       ("which" ,which)
-      ("bash", bash)))
+      ("bash", bash))
+      ("fcitx", fcitx)
+      ("fcitx5" ,fcitx5)
+      ("uim", uim))
    (inputs
     `(("which" ,which)
       ("ninja" ,ninja)
