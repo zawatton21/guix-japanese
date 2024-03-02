@@ -184,6 +184,8 @@ standard library.")
                      (replace 'configure
                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                 ;; 依存関係のパスを定義
+                                (define out (assoc-ref outputs "out"))
+                                (define mozc-dir (string-append out "/lib/mozc"))
                                 (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
                                 (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
                                 (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
