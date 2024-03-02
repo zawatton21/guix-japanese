@@ -391,12 +391,12 @@ standard library.")
                      (replace 'install
                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                 (let* ((out (assoc-ref outputs "out"))
-                                       (bin-dir (string-append out "/bin"))))
+                                       (bin-dir (string-append out "/bin")))
                                 ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
                                 (mkdir-p bin-dir)
                                 ;; 実行ファイルやリソースファイルのコピー
                                 (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
-                                #t)))))))
+                                #t))))))))
 
 (define-public ibus-skk
   (package
