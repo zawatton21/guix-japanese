@@ -316,7 +316,7 @@ standard library.")
       ("bash", bash)
       ("fcitx", fcitx)
       ("fcitx5" ,fcitx5)
-      ("uim", uim))
+      ("uim", uim)))
    (inputs
     `(("which" ,which)
       ("ninja" ,ninja)
