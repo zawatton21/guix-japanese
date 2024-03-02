@@ -265,7 +265,7 @@ standard library.")
     (inherit mozc)
     (name "ibus-mozc")
     (arguments
-     (substitute-keyword-arguments (package-arguments mozc-tool)
+     (substitute-keyword-arguments (package-arguments mozc)
        ((#:phases phases)
         `(modify-phases ,phases
            (replace 'build
@@ -343,7 +343,7 @@ standard library.")
     (inherit mozc)
     (name "mozc-emacs-helper")
     (arguments
-     (substitute-keyword-arguments (package-arguments mozc-tool)
+     (substitute-keyword-arguments (package-arguments mozc)
        ((#:phases phases)
         `(modify-phases ,phases
            (replace 'build
