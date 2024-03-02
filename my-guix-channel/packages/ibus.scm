@@ -339,7 +339,6 @@ standard library.")
                         (mkdir-p lib-dir)
                         (mkdir-p mozc-dir)
                         (mkdir-p share-dir)
-                        (mkdir-p images-dir)
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
                         (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
