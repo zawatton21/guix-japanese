@@ -1,4 +1,4 @@
-(define-module (my-guix-channel packages my-ibus)
+(define-module (my-guix-channel packages ibus)
   #:use-module  (guix packages)
   #:use-module  (guix download)
   #:use-module  (guix git-download)
