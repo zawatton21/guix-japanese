@@ -143,7 +143,7 @@ standard library.")
    (description "This package provides the Debian patches for mozc.")
    (license gpl2+)))
 
-(define-public mozc-tool
+(define mozc-tool
   (package
    (name "mozc-tool")
    (version "2.28.4715.102")
@@ -219,7 +219,7 @@ standard library.")
                                 (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
                                 ;; bazelビルドスクリプトの実行
                                 (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                                #t))                              
+                                #t))
                      (delete 'check)
                      (replace 'build
                               (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -312,204 +312,81 @@ standard library.")
 
 (define-public ibus-mozc
   (package
-    (inherit mozc-tool)
+    (inherit mozc-tools)
     (name "ibus-mozc")
     (arguments
-    `(#:modules ((guix build gnu-build-system)
-                 (guix build utils)
-                 (srfi srfi-1) ;; List操作のため
-                 (ice-9 rdelim) ;; read-string関数のため
-                 (ice-9 regex)  ;; 正規表現機能のため
-                 (ice-9 format)) ;; format関数のため
-      #:phases
-      (modify-phases %standard-phases
-                     (add-after 'unpack 'post-patch
-                                (lambda* (#:key inputs outputs #:allow-other-keys)
-                                  (let* ((chdir "src")
-                                         (patch-dir (string-append (assoc-ref inputs "mozc-debian-patches") "/debian/patches"))
-                                         (patches '("0001-Update-uim-mozc-to-c979f127acaeb7b35d3344e8b1e40848e.patch"
-                                                    "0002-Support-fcitx.patch"
-                                                    "0003-Change-compiler-from-clang-to-gcc.patch"
-                                                    "0004-Add-usage_dict.txt.patch"
-                                                    "0005-Enable-verbose-build.patch"
-                                                    "0006-Update-gyp-using-absl.patch"
-                                                    "0007-common.gypi-Use-command-v-instead-of-which.patch"
-                                                    ;;"0008-renderer-Convert-Gtk2-to-Gtk3.patch" ;; Wayland でなく X11 を使用している時はgtk2で良いのでコメントアウト
-                                                    "0009-protobuf.gyp-Add-latomic-to-link_settings.patch")))
-                                    (for-each (lambda (patch)
-                                                (invoke "patch" "-p1" "-i" (string-append patch-dir "/" patch)))
-                                              patches))))
-                     ;;(delete 'configure)
-                     (replace 'configure
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                ;; 依存関係のパスを定義
-                                (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
-                                (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
-                                (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
-                                (define findutils-bin (string-append (assoc-ref %build-inputs "findutils") "/bin"))
-                                (define grep-bin (string-append (assoc-ref %build-inputs "grep") "/bin"))
-                                (define sed-bin (string-append (assoc-ref %build-inputs "sed") "/bin"))
-                                (define which-bin (string-append (assoc-ref %build-inputs "which") "/bin"))
-                                (define python-bin (string-append (assoc-ref %build-inputs "python") "/bin"))
-                                (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
-                                (define qtbase-bin (string-append (assoc-ref %build-inputs "qtbase") "/bin"))
-                                (define qttools-bin (string-append (assoc-ref %build-inputs "qttools") "/bin"))
-                                (define gettext-bin (string-append (assoc-ref %build-inputs "gettext") "/bin"))
-                                (define gtk2-bin (string-append (assoc-ref %build-inputs "gtk+") "/bin"))
-                                (define fcitx-bin (string-append (assoc-ref %build-inputs "fcitx") "/bin"))
-                                (define fcitx5-bin (string-append (assoc-ref %build-inputs "fcitx5") "/bin"))
-                                (define uim-bin (string-append (assoc-ref %build-inputs "uim") "/bin"))
-
-                                (setenv "HOME" (getcwd)) ;; 現在の作業ディレクトリをホームディレクトリとして設定
-                                (setenv "PYTHON_BIN_PATH" (string-append (assoc-ref %build-inputs "python") "/bin"))
-                                ;; 環境変数pathにjdkのbinディレクトリと他のツールのパスを追加
-                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
-                                (setenv "PKG_CONFIG_PATH"
-                                        (string-join
-                                         (list (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
-                                               (string-append (assoc-ref inputs "qttools") "/lib/pkgconfig")
-                                               (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
-                                               (getenv "PKG_CONFIG_PATH"))
-                                         ":"))
-                                #t))                              
-                     (delete 'check)
-                     (replace 'build
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                (define out (assoc-ref outputs "out"))
-                                (define mozc-dir (string-append out "/lib/mozc"))
-
-                                (chdir "src")
-                                (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
-                                ;; bazelビルドスクリプトの実行
-                                (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                                (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer")
-                                #t))
-                     (replace 'install
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (lib-dir (string-append out "/lib/ibus-mozc"))
-                		       (mozc-dir (string-append out "/lib/mozc"))
-                                       (share-dir (string-append out "/share/ibus/component"))
-                                       (applications-dir (string-append out "/share/applications"))
-                                       (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
-                                       (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
-                                       (exec-path (string-append out "/lib/mozc/mozc_tool"))
-                                       (icon-path (string-append out "/share/ibus-mozc/product_icon.png"))
-                		       (version "2.28.4715.102"))
-                                ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
-                                (mkdir-p lib-dir)
-                                (mkdir-p mozc-dir)
-                                (mkdir-p share-dir)
-                                (mkdir-p images-dir)
-                                ;; 実行ファイルやリソースファイルのコピー
-                                (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
-                                (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
-                                (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
-                                 	           
-                                (substitute* (string-append "out_linux/Release/gen/unix/ibus/mozc.xml")
-                                             (("/usr/lib/ibus-mozc/ibus-engine-mozc --ibus") 
-                                              (string-append out "/lib/ibus-mozc/ibus-engine-mozc --ibus"))
-                                             (("/usr/lib/ibus-mozc/ibus-engine-mozc --xml")
-                                              (string-append out "/lib/ibus-mozc/ibus-engine-mozc --xml"))
-                                             (("0.0.0.0") version))
-                                     
-                                (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
-
-                                (mkdir-p applications-dir)
-                                    
-
-                                ;; ibus-setup-mozc-jp.desktop の処理（Execのパスのみ変更）
-                                (let ((source-file (string-append desktop-files-source-dir "/ibus-setup-mozc-jp.desktop"))
-                                      (destination-file (string-append applications-dir "/ibus-setup-mozc-jp.desktop")))
-                                  (copy-file source-file destination-file)
-                                  (substitute* destination-file
-                                               (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
-                                                (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                                #t))))))))
+     (substitute-keyword-arguments (package-arguments mozc-tool)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (replace 'build
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      ;; bazelビルドスクリプトの実行
+                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer")
+                      #t))
+           (replace 'install
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (let* ((out (assoc-ref outputs "out"))
+                             (lib-dir (string-append out "/lib/ibus-mozc"))
+                	     (mozc-dir (string-append out "/lib/mozc"))
+                             (share-dir (string-append out "/share/ibus/component"))
+                             (applications-dir (string-append out "/share/applications"))
+                             (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
+                             (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
+                             (exec-path (string-append out "/lib/mozc/mozc_tool"))
+                             (icon-path (string-append out "/share/ibus-mozc/product_icon.png"))
+                	     (version "2.28.4715.102"))
+                        ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
+                        (mkdir-p lib-dir)
+                        (mkdir-p mozc-dir)
+                        (mkdir-p share-dir)
+                        (mkdir-p images-dir)
+                        ;; 実行ファイルやリソースファイルのコピー
+                        (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
+                        (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
+                        (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
+                        
+                        (substitute* (string-append "out_linux/Release/gen/unix/ibus/mozc.xml")
+                                     (("/usr/lib/ibus-mozc/ibus-engine-mozc --ibus") 
+                                      (string-append out "/lib/ibus-mozc/ibus-engine-mozc --ibus"))
+                                     (("/usr/lib/ibus-mozc/ibus-engine-mozc --xml")
+                                      (string-append out "/lib/ibus-mozc/ibus-engine-mozc --xml"))
+                                     (("0.0.0.0") version))
+                        
+                        (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
+                        
+                        (mkdir-p applications-dir)
+                        
+                        ;; ibus-setup-mozc-jp.desktop の処理（Execのパスのみ変更）
+                        (let ((source-file (string-append desktop-files-source-dir "/ibus-setup-mozc-jp.desktop"))
+                              (destination-file (string-append applications-dir "/ibus-setup-mozc-jp.desktop")))
+                          (copy-file source-file destination-file)
+                          (substitute* destination-file
+                                       (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
+                                        (string-append "Exec=" exec-path " --mode=config_dialog"))))
+                        #t)))))))))
 
 (define-public mozc-emacs-helper
   (package
     (inherit mozc-tool)
     (name "mozc-emacs-helper")
     (arguments
-    `(#:modules ((guix build gnu-build-system)
-                 (guix build utils)
-                 (srfi srfi-1) ;; List操作のため
-                 (ice-9 rdelim) ;; read-string関数のため
-                 (ice-9 regex)  ;; 正規表現機能のため
-                 (ice-9 format)) ;; format関数のため
-      #:phases
-      (modify-phases %standard-phases
-                     (add-after 'unpack 'post-patch
-                                (lambda* (#:key inputs outputs #:allow-other-keys)
-                                  (let* ((chdir "src")
-                                         (patch-dir (string-append (assoc-ref inputs "mozc-debian-patches") "/debian/patches"))
-                                         (patches '("0001-Update-uim-mozc-to-c979f127acaeb7b35d3344e8b1e40848e.patch"
-                                                    "0002-Support-fcitx.patch"
-                                                    "0003-Change-compiler-from-clang-to-gcc.patch"
-                                                    "0004-Add-usage_dict.txt.patch"
-                                                    "0005-Enable-verbose-build.patch"
-                                                    "0006-Update-gyp-using-absl.patch"
-                                                    "0007-common.gypi-Use-command-v-instead-of-which.patch"
-                                                    ;;"0008-renderer-Convert-Gtk2-to-Gtk3.patch" ;; Wayland でなく X11 を使用している時はgtk2で良いのでコメントアウト
-                                                    "0009-protobuf.gyp-Add-latomic-to-link_settings.patch")))
-                                    (for-each (lambda (patch)
-                                                (invoke "patch" "-p1" "-i" (string-append patch-dir "/" patch)))
-                                              patches))))
-                     ;;(delete 'configure)
-                     (replace 'configure
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                ;; 依存関係のパスを定義
-                                (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
-                                (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
-                                (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
-                                (define findutils-bin (string-append (assoc-ref %build-inputs "findutils") "/bin"))
-                                (define grep-bin (string-append (assoc-ref %build-inputs "grep") "/bin"))
-                                (define sed-bin (string-append (assoc-ref %build-inputs "sed") "/bin"))
-                                (define which-bin (string-append (assoc-ref %build-inputs "which") "/bin"))
-                                (define python-bin (string-append (assoc-ref %build-inputs "python") "/bin"))
-                                (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
-                                (define qtbase-bin (string-append (assoc-ref %build-inputs "qtbase") "/bin"))
-                                (define qttools-bin (string-append (assoc-ref %build-inputs "qttools") "/bin"))
-                                (define gettext-bin (string-append (assoc-ref %build-inputs "gettext") "/bin"))
-                                (define gtk2-bin (string-append (assoc-ref %build-inputs "gtk+") "/bin"))
-                                (define fcitx-bin (string-append (assoc-ref %build-inputs "fcitx") "/bin"))
-                                (define fcitx5-bin (string-append (assoc-ref %build-inputs "fcitx5") "/bin"))
-                                (define uim-bin (string-append (assoc-ref %build-inputs "uim") "/bin"))
-
-                                (setenv "HOME" (getcwd)) ;; 現在の作業ディレクトリをホームディレクトリとして設定
-                                (setenv "PYTHON_BIN_PATH" (string-append (assoc-ref %build-inputs "python") "/bin"))
-                                ;; 環境変数pathにjdkのbinディレクトリと他のツールのパスを追加
-                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
-                                (setenv "PKG_CONFIG_PATH"
-                                        (string-join
-                                         (list (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
-                                               (string-append (assoc-ref inputs "qttools") "/lib/pkgconfig")
-                                               (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
-                                               (getenv "PKG_CONFIG_PATH"))
-                                         ":"))
-                                #t))                              
-                     (delete 'check)
-                     (replace 'build
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                (define out (assoc-ref outputs "out"))
-                                (define mozc-dir (string-append out "/lib/mozc"))
-
-                                (chdir "src")
-                                (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
-                                ;; bazelビルドスクリプトの実行
-                                (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                                (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
-                                #t))
-                     (replace 'install
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (bin-dir (string-append out "/bin")))
-                                ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
-                                (mkdir-p bin-dir)
-                                ;; 実行ファイルやリソースファイルのコピー
-                                (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
-                                #t))))))))
+     (substitute-keyword-arguments (package-arguments mozc-tool)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (replace 'build
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      ;; bazelビルドスクリプトの実行
+                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
+                      #t))
+           (replace 'install
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (let* ((out (assoc-ref outputs "out"))
+                             (bin-dir (string-append out "/bin")))
+                        ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
+                        (mkdir-p bin-dir)
+                        ;; 実行ファイルやリソースファイルのコピー
+                        (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
+                        #t)))))))))
 
 (define-public ibus-skk
   (package
