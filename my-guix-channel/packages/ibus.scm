@@ -316,6 +316,64 @@ standard library.")
     (arguments
     `(#:phases
       (modify-phases %standard-phases
+    `(#:modules ((guix build gnu-build-system)
+                 (guix build utils)
+                 (srfi srfi-1) ;; List操作のため
+                 (ice-9 rdelim) ;; read-string関数のため
+                 (ice-9 regex)  ;; 正規表現機能のため
+                 (ice-9 format)) ;; format関数のため
+      #:phases
+      (modify-phases %standard-phases
+                     (add-after 'unpack 'post-patch
+                                (lambda* (#:key inputs outputs #:allow-other-keys)
+                                  (let* ((chdir "src")
+                                         (patch-dir (string-append (assoc-ref inputs "mozc-debian-patches") "/debian/patches"))
+                                         (patches '("0001-Update-uim-mozc-to-c979f127acaeb7b35d3344e8b1e40848e.patch"
+                                                    "0002-Support-fcitx.patch"
+                                                    "0003-Change-compiler-from-clang-to-gcc.patch"
+                                                    "0004-Add-usage_dict.txt.patch"
+                                                    "0005-Enable-verbose-build.patch"
+                                                    "0006-Update-gyp-using-absl.patch"
+                                                    "0007-common.gypi-Use-command-v-instead-of-which.patch"
+                                                    ;;"0008-renderer-Convert-Gtk2-to-Gtk3.patch" ;; Wayland でなく X11 を使用している時はgtk2で良いのでコメントアウト
+                                                    "0009-protobuf.gyp-Add-latomic-to-link_settings.patch")))
+                                    (for-each (lambda (patch)
+                                                (invoke "patch" "-p1" "-i" (string-append patch-dir "/" patch)))
+                                              patches))))
+                     ;;(delete 'configure)
+                     (replace 'configure
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                ;; 依存関係のパスを定義
+                                (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
+                                (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
+                                (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
+                                (define findutils-bin (string-append (assoc-ref %build-inputs "findutils") "/bin"))
+                                (define grep-bin (string-append (assoc-ref %build-inputs "grep") "/bin"))
+                                (define sed-bin (string-append (assoc-ref %build-inputs "sed") "/bin"))
+                                (define which-bin (string-append (assoc-ref %build-inputs "which") "/bin"))
+                                (define python-bin (string-append (assoc-ref %build-inputs "python") "/bin"))
+                                (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+                                (define qtbase-bin (string-append (assoc-ref %build-inputs "qtbase") "/bin"))
+                                (define qttools-bin (string-append (assoc-ref %build-inputs "qttools") "/bin"))
+                                (define gettext-bin (string-append (assoc-ref %build-inputs "gettext") "/bin"))
+                                (define gtk2-bin (string-append (assoc-ref %build-inputs "gtk+") "/bin"))
+                                (define fcitx-bin (string-append (assoc-ref %build-inputs "fcitx") "/bin"))
+                                (define fcitx5-bin (string-append (assoc-ref %build-inputs "fcitx5") "/bin"))
+                                (define uim-bin (string-append (assoc-ref %build-inputs "uim") "/bin"))
+
+                                (setenv "HOME" (getcwd)) ;; 現在の作業ディレクトリをホームディレクトリとして設定
+                                (setenv "PYTHON_BIN_PATH" (string-append (assoc-ref %build-inputs "python") "/bin"))
+                                ;; 環境変数pathにjdkのbinディレクトリと他のツールのパスを追加
+                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
+                                (setenv "PKG_CONFIG_PATH"
+                                        (string-join
+                                         (list (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                               (string-append (assoc-ref inputs "qttools") "/lib/pkgconfig")
+                                               (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
+                                               (getenv "PKG_CONFIG_PATH"))
+                                         ":"))
+                                #t))                              
+                     (delete 'check)
                      (replace 'build
                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                 (define out (assoc-ref outputs "out"))
@@ -368,7 +426,7 @@ standard library.")
                                   (substitute* destination-file
                                                (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
                                                 (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                                #t))))))))
+                                #t))))))))))
 
 (define-public mozc-emacs-helper
   (package
@@ -377,6 +435,64 @@ standard library.")
     (arguments
     `(#:phases
       (modify-phases %standard-phases
+    `(#:modules ((guix build gnu-build-system)
+                 (guix build utils)
+                 (srfi srfi-1) ;; List操作のため
+                 (ice-9 rdelim) ;; read-string関数のため
+                 (ice-9 regex)  ;; 正規表現機能のため
+                 (ice-9 format)) ;; format関数のため
+      #:phases
+      (modify-phases %standard-phases
+                     (add-after 'unpack 'post-patch
+                                (lambda* (#:key inputs outputs #:allow-other-keys)
+                                  (let* ((chdir "src")
+                                         (patch-dir (string-append (assoc-ref inputs "mozc-debian-patches") "/debian/patches"))
+                                         (patches '("0001-Update-uim-mozc-to-c979f127acaeb7b35d3344e8b1e40848e.patch"
+                                                    "0002-Support-fcitx.patch"
+                                                    "0003-Change-compiler-from-clang-to-gcc.patch"
+                                                    "0004-Add-usage_dict.txt.patch"
+                                                    "0005-Enable-verbose-build.patch"
+                                                    "0006-Update-gyp-using-absl.patch"
+                                                    "0007-common.gypi-Use-command-v-instead-of-which.patch"
+                                                    ;;"0008-renderer-Convert-Gtk2-to-Gtk3.patch" ;; Wayland でなく X11 を使用している時はgtk2で良いのでコメントアウト
+                                                    "0009-protobuf.gyp-Add-latomic-to-link_settings.patch")))
+                                    (for-each (lambda (patch)
+                                                (invoke "patch" "-p1" "-i" (string-append patch-dir "/" patch)))
+                                              patches))))
+                     ;;(delete 'configure)
+                     (replace 'configure
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                ;; 依存関係のパスを定義
+                                (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
+                                (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
+                                (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
+                                (define findutils-bin (string-append (assoc-ref %build-inputs "findutils") "/bin"))
+                                (define grep-bin (string-append (assoc-ref %build-inputs "grep") "/bin"))
+                                (define sed-bin (string-append (assoc-ref %build-inputs "sed") "/bin"))
+                                (define which-bin (string-append (assoc-ref %build-inputs "which") "/bin"))
+                                (define python-bin (string-append (assoc-ref %build-inputs "python") "/bin"))
+                                (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+                                (define qtbase-bin (string-append (assoc-ref %build-inputs "qtbase") "/bin"))
+                                (define qttools-bin (string-append (assoc-ref %build-inputs "qttools") "/bin"))
+                                (define gettext-bin (string-append (assoc-ref %build-inputs "gettext") "/bin"))
+                                (define gtk2-bin (string-append (assoc-ref %build-inputs "gtk+") "/bin"))
+                                (define fcitx-bin (string-append (assoc-ref %build-inputs "fcitx") "/bin"))
+                                (define fcitx5-bin (string-append (assoc-ref %build-inputs "fcitx5") "/bin"))
+                                (define uim-bin (string-append (assoc-ref %build-inputs "uim") "/bin"))
+
+                                (setenv "HOME" (getcwd)) ;; 現在の作業ディレクトリをホームディレクトリとして設定
+                                (setenv "PYTHON_BIN_PATH" (string-append (assoc-ref %build-inputs "python") "/bin"))
+                                ;; 環境変数pathにjdkのbinディレクトリと他のツールのパスを追加
+                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
+                                (setenv "PKG_CONFIG_PATH"
+                                        (string-join
+                                         (list (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                               (string-append (assoc-ref inputs "qttools") "/lib/pkgconfig")
+                                               (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
+                                               (getenv "PKG_CONFIG_PATH"))
+                                         ":"))
+                                #t))                              
+                     (delete 'check)
                      (replace 'build
                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                 (define out (assoc-ref outputs "out"))
@@ -396,7 +512,7 @@ standard library.")
                                 (mkdir-p bin-dir)
                                 ;; 実行ファイルやリソースファイルのコピー
                                 (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
-                                #t))))))))
+                                #t))))))))))
 
 (define-public ibus-skk
   (package
