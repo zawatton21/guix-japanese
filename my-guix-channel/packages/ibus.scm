@@ -338,7 +338,7 @@ standard library.")
                                        (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
                                        (exec-path (string-append out "/lib/mozc/mozc_tool"))
                                        (icon-path (string-append out "/share/ibus-mozc/product_icon.png"))
-                		       (version "2.28.4715.102")))
+                		       (version "2.28.4715.102"))
                                 ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
                                 (mkdir-p lib-dir)
                                 (mkdir-p mozc-dir)
@@ -368,7 +368,7 @@ standard library.")
                                   (substitute* destination-file
                                                (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
                                                 (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                                #t)))))))
+                                #t))))))))
 
 (define-public mozc-emacs-helper
   (package
