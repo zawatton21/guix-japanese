@@ -143,9 +143,9 @@ standard library.")
    (description "This package provides the Debian patches for mozc.")
    (license gpl2+)))
 
-(define-public ibus-mozc
+(define-public mozc-tool
   (package
-   (name "ibus-mozc")
+   (name "mozc-tool")
    (version "2.28.4715.102")
    (source (origin
             (method url-fetch)
@@ -180,12 +180,9 @@ standard library.")
                                     (for-each (lambda (patch)
                                                 (invoke "patch" "-p1" "-i" (string-append patch-dir "/" patch)))
                                               patches))))
-                     (delete 'configure)
-                     (delete 'check)
-                     (replace 'build
+                     ;;(delete 'configure)
+                     (replace 'configure
                               (lambda* (#:key inputs outputs #:allow-other-keys)
-                                (define out (assoc-ref outputs "out"))
-                                (define mozc-dir (string-append out "/lib/mozc"))
                                 ;; 依存関係のパスを定義
                                 (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
                                 (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
@@ -215,36 +212,26 @@ standard library.")
                                                (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                (getenv "PKG_CONFIG_PATH"))
                                          ":"))
+                                #t))                              
+                     (delete 'check)
+                     (replace 'build
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                (define out (assoc-ref outputs "out"))
+                                (define mozc-dir (string-append out "/lib/mozc"))
+
                                 (chdir "src")
                                 (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
                                 ;; bazelビルドスクリプトの実行
                                 (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                                (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "unix/emacs/emacs.gyp:mozc_emacs_helper" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
+                                (invoke "python3" "build_mozc.py" "build" "-c" "Release" "gui/gui.gyp:mozc_tool")
                                 #t))
-                     (replace 'install
+                     (add-before 'install 'copy-image-package
                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                 (let* ((out (assoc-ref outputs "out"))
-                                       (bin-dir (string-append out "/bin"))
-                                       (lib-dir (string-append out "/lib/ibus-mozc"))
-                                       (mozc-dir (string-append out "/lib/mozc"))
-                                       (share-dir (string-append out "/share/ibus/component"))
-                                       (images-dir (string-append out "/share/ibus-mozc"))
-                                       (version "2.28.4715.102")) ; パッケージのバージョン
+                                       (images-dir (string-append out "/share/ibus-mozc")))
                                   ;; ディレクトリの作成とファイルのコピー
-                                  (mkdir-p bin-dir)
-                                  (mkdir-p lib-dir)
-                                  (mkdir-p mozc-dir)
-                                  (mkdir-p share-dir)
                                   (mkdir-p images-dir)
-                                  
-                                  ;; 実行ファイルやリソースファイルのコピー
-                                  (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
-                                  (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
-                                  (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
-                                  (copy-recursively "out_linux/Release/mozc_tool" (string-append mozc-dir "/mozc_tool"))
-                                  
-                                  (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
-                                  
+
                                   (copy-recursively "data/images/unix/ui-alpha_full.png" (string-append images-dir "/alpha_full.png"))
                                   (copy-recursively "data/images/unix/ui-alpha_half.png" (string-append images-dir "/alpha_half.png"))
                                   (copy-recursively "data/images/unix/ui-dictionary.png" (string-append images-dir "/dictionary.png"))
@@ -254,47 +241,35 @@ standard library.")
                                   (copy-recursively "data/images/unix/ui-katakana_half.png" (string-append images-dir "/katakana_half.png"))
                                   (copy-recursively "data/images/unix/ime_product_icon_opensource-32.png" (string-append images-dir "/product_icon.png"))
                                   (copy-recursively "data/images/unix/ui-properties.png" (string-append images-dir "/properties.png"))
-                                  (copy-recursively "data/images/unix/ui-tool.png" (string-append images-dir "/tool.png"))
-                                  
-                                  ;; mozc.xml内の文字列を置換
-                                  (substitute* (string-append "out_linux/Release/gen/unix/ibus/mozc.xml")
-                                               (("/usr/lib/ibus-mozc/ibus-engine-mozc --ibus") 
-                                                (string-append out "/lib/ibus-mozc/ibus-engine-mozc --ibus"))
-                                               (("/usr/lib/ibus-mozc/ibus-engine-mozc --xml")
-                                                (string-append out "/lib/ibus-mozc/ibus-engine-mozc --xml"))
-                                               (("0.0.0.0") version))
-
-                                  ;; mozc.xmlをコピー
-                                  (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
+                                  (copy-recursively "data/images/unix/ui-tool.png" (string-append images-dir "/tool.png"))                            
                                   #t)))
-                     (add-after 'install 'install-and-modify-desktop-files
-                                (lambda* (#:key inputs outputs #:allow-other-keys)
-                                  (let* ((out (assoc-ref outputs "out"))
-                                         (applications-dir (string-append out "/share/applications"))
-                                         (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
-                                         (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
-                                         (exec-path (string-append out "/lib/mozc/mozc_tool"))
-                                         (icon-path (string-append out "/share/ibus-mozc/product_icon.png")))
-                                    (mkdir-p applications-dir)
+                     (replace 'install
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (mozc-dir (string-append out "/lib/mozc"))
+                                       (applications-dir (string-append out "/share/applications"))
+                                       (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
+                                       (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
+                                       (exec-path (string-append out "/lib/mozc/mozc_tool"))
+                                       (icon-path (string-append out "/share/ibus-mozc/product_icon.png")))
+                                  ;; ディレクトリの作成とファイルのコピー
+                                  (mkdir-p mozc-dir)
+                                  
+                                  ;; 実行ファイルやリソースファイルのコピー
+                                  (copy-recursively "out_linux/Release/mozc_tool" (string-append mozc-dir "/mozc_tool"))
+                                                                    
+                                  (mkdir-p applications-dir)
                                     
-                                    ;; setup-mozc.desktop の処理
-                                    (let ((source-file (string-append desktop-files-source-dir "/setup-mozc.desktop"))
-                                          (destination-file (string-append applications-dir "/setup-mozc.desktop")))
-                                      (copy-file source-file destination-file)
-                                      (substitute* destination-file
-                                                   (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
-                                                    (string-append "Exec=" exec-path " --mode=config_dialog"))
-                                                   (("Icon=/usr/share/icons/mozc/product_icon_32bpp-128.png" _)
-                                                    (string-append "Icon=" icon-path))))
-                                    
-                                    ;; ibus-setup-mozc-jp.desktop の処理（Execのパスのみ変更）
-                                    (let ((source-file (string-append desktop-files-source-dir "/ibus-setup-mozc-jp.desktop"))
-                                          (destination-file (string-append applications-dir "/ibus-setup-mozc-jp.desktop")))
-                                      (copy-file source-file destination-file)
-                                      (substitute* destination-file
-                                                   (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
-                                                    (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                                    #t))))))
+                                  ;; setup-mozc.desktop の処理
+                                  (let ((source-file (string-append desktop-files-source-dir "/setup-mozc.desktop"))
+                                        (destination-file (string-append applications-dir "/setup-mozc.desktop")))
+                                    (copy-file source-file destination-file)
+                                    (substitute* destination-file
+                                                 (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
+                                                  (string-append "Exec=" exec-path " --mode=config_dialog"))
+                                                 (("Icon=/usr/share/icons/mozc/product_icon_32bpp-128.png" _)
+                                                  (string-append "Icon=" icon-path))))
+                                  #t))))))
    (native-inputs
     `(("mozc-debian-patches" ,mozc-debian-patches)
       ("ninja" ,ninja)
@@ -333,6 +308,95 @@ standard library.")
    (description "this package provides the mozc input method for japanese, developed by google.")
    (home-page "https://github.com/google/mozc")
    (license gpl3+)))
+
+(define-public ibus-mozc
+  (package
+    (inherit mozc-tool)
+    (name "ibus-mozc")
+    (arguments
+    `(#:phases
+      (modify-phases %standard-phases
+                     (replace 'build
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                (define out (assoc-ref outputs "out"))
+                                (define mozc-dir (string-append out "/lib/mozc"))
+
+                                (chdir "src")
+                                (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
+                                ;; bazelビルドスクリプトの実行
+                                (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
+                                (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer")
+                                #t))
+                     (replace 'install
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (lib-dir (string-append out "/lib/ibus-mozc"))
+                		       (mozc-dir (string-append out "/lib/mozc"))
+                                       (share-dir (string-append out "/share/ibus/component"))
+                                       (applications-dir (string-append out "/share/applications"))
+                                       (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
+                                       (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
+                                       (exec-path (string-append out "/lib/mozc/mozc_tool"))
+                                       (icon-path (string-append out "/share/ibus-mozc/product_icon.png"))
+                		       (version "2.28.4715.102")))
+                                ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
+                                (mkdir-p lib-dir)
+                                (mkdir-p mozc-dir)
+                                (mkdir-p share-dir)
+                                (mkdir-p images-dir)
+                                ;; 実行ファイルやリソースファイルのコピー
+                                (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
+                                (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
+                                (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
+                                 	           
+                                (substitute* (string-append "out_linux/Release/gen/unix/ibus/mozc.xml")
+                                             (("/usr/lib/ibus-mozc/ibus-engine-mozc --ibus") 
+                                              (string-append out "/lib/ibus-mozc/ibus-engine-mozc --ibus"))
+                                             (("/usr/lib/ibus-mozc/ibus-engine-mozc --xml")
+                                              (string-append out "/lib/ibus-mozc/ibus-engine-mozc --xml"))
+                                             (("0.0.0.0") version))
+                                     
+                                (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
+
+                                (mkdir-p applications-dir)
+                                    
+
+                                ;; ibus-setup-mozc-jp.desktop の処理（Execのパスのみ変更）
+                                (let ((source-file (string-append desktop-files-source-dir "/ibus-setup-mozc-jp.desktop"))
+                                      (destination-file (string-append applications-dir "/ibus-setup-mozc-jp.desktop")))
+                                  (copy-file source-file destination-file)
+                                  (substitute* destination-file
+                                               (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
+                                                (string-append "Exec=" exec-path " --mode=config_dialog"))))
+                                #t)))))))
+
+(define-public mozc-emacs-helper
+  (package
+    (inherit mozc-tool)
+    (name "mozc-emacs-helper")
+    (arguments
+    `(#:phases
+      (modify-phases %standard-phases
+                     (replace 'build
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                (define out (assoc-ref outputs "out"))
+                                (define mozc-dir (string-append out "/lib/mozc"))
+
+                                (chdir "src")
+                                (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
+                                ;; bazelビルドスクリプトの実行
+                                (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
+                                (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
+                                #t))
+                     (replace 'install
+                              (lambda* (#:key inputs outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (bin-dir (string-append out "/bin"))))
+                                ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
+                                (mkdir-p bin-dir)
+                                ;; 実行ファイルやリソースファイルのコピー
+                                (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
+                                #t)))))))
 
 (define-public ibus-skk
   (package
