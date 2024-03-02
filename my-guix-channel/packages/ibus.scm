@@ -312,7 +312,7 @@ standard library.")
 
 (define-public ibus-mozc
   (package
-    (inherit mozc-tools)
+    (inherit mozc-tool)
     (name "ibus-mozc")
     (arguments
      (substitute-keyword-arguments (package-arguments mozc-tool)
