@@ -350,7 +350,9 @@ standard library.")
         `(modify-phases ,phases
            (replace 'build
                     (lambda* (#:key inputs outputs #:allow-other-keys)
-                      (define mozc-dir (string-append (assoc-ref inputs "ibus-mozc") "/lib/mozc"))
+                      (define out (assoc-ref outputs "out"))
+                      (define mozc-dir (string-append out "/lib/mozc"))
+                      ;;(define mozc-dir (string-append (assoc-ref inputs "ibus-mozc") "/lib/mozc"))
                       (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
                       (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
 
@@ -367,8 +369,9 @@ standard library.")
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
                         #t)))))))
-   (inputs
-    `(("ibus-mozc" ,ibus-mozc)))))
+;;   (inputs
+;;    `(("ibus-mozc" ,ibus-mozc)))
+))
 
 (define-public ibus-skk
   (package
