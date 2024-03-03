@@ -305,7 +305,7 @@ standard library.")
                       ;; bazelビルドスクリプトの実行
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
                       (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
-                      #t))
+                      #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (let* ((out (assoc-ref outputs "out"))
@@ -369,7 +369,7 @@ standard library.")
                           (substitute* destination-file
                                        (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
                                         (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                        #t))))))))
+                        #t)))))))
     (inputs
      `(("mozc-server" ,mozc-server)
        ,@(package-inputs mozc-common)))))
