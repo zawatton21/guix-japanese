@@ -350,7 +350,6 @@ standard library.")
         `(modify-phases ,phases
            (replace 'build
                     (lambda* (#:key inputs outputs #:allow-other-keys)
-                      (define out (assoc-ref outputs "out"))
                       (define mozc-dir (string-append (assoc-ref inputs "ibus-mozc") "/lib/mozc"))
                       (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
                       (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
