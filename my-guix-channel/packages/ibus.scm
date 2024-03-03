@@ -351,15 +351,17 @@ standard library.")
            (replace 'build
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (define out (assoc-ref outputs "out"))
-                      (define mozc-dir (string-append out "/lib/mozc"))
-                      ;;(define mozc-dir (string-append (assoc-ref inputs "ibus-mozc") "/lib/mozc"))
-                      (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
-                      (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
+                      (let ((ibus-mozc-path (assoc-ref inputs "ibus-mozc")))
+                        (unless ibus-mozc-path
+                          (error "ibus-mozc input not found"))
+                        (define mozc-dir (string-append ibus-mozc-path "/lib/mozc"))
+                        (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+                        (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
 
-                      ;; bazelビルドスクリプトの実行
-                      (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
-                      #t))
+                        ;; bazelビルドスクリプトの実行
+                        (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
+                        (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
+                        #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (let* ((out (assoc-ref outputs "out"))
@@ -369,9 +371,8 @@ standard library.")
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
                         #t)))))))
-;;   (inputs
-;;    `(("ibus-mozc" ,ibus-mozc)))
-))
+   (inputs
+    `(("ibus-mozc" ,ibus-mozc)))))
 
 (define-public ibus-skk
   (package
