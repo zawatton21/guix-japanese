@@ -372,7 +372,7 @@ standard library.")
                         (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
                         #t)))))))
     (inputs
-     (modify-inputs (package-native-inputs mozc-common)
+     (modify-inputs (package-inputs mozc-common)
                     (append ("ibus-mozc" ,ibus-mozc))))))
 
 (define-public ibus-skk
