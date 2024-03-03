@@ -277,11 +277,45 @@ standard library.")
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (let* ((out (assoc-ref outputs "out"))
-               	             (mozc-dir (string-append out "/lib/mozc")))
+               	             (mozc-dir (string-append out "/lib/mozc"))
+                             (share-dir (string-append out "/share/ibus/component"))
+                             (images-dir (string-append out "/share/ibus-mozc"))
+                             (applications-dir (string-append out "/share/applications"))
+                             (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
+                             (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
+                             (exec-path (string-append out "/lib/mozc/mozc_tool"))
+                             (icon-path (string-append out "/share/ibus-mozc/product_icon.png")))
+
                         (mkdir-p mozc-dir)
+                        (mkdir-p images-dir)
 
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
+                        (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
+                        (copy-recursively "out_linux/Release/mozc_tool" (string-append mozc-dir "/mozc_tool"))
+                                                                    
+                        (copy-recursively "data/images/unix/ui-alpha_full.png" (string-append images-dir "/alpha_full.png"))
+                        (copy-recursively "data/images/unix/ui-alpha_half.png" (string-append images-dir "/alpha_half.png"))
+                        (copy-recursively "data/images/unix/ui-dictionary.png" (string-append images-dir "/dictionary.png"))
+                        (copy-recursively "data/images/unix/ui-direct.png" (string-append images-dir "/direct.png"))
+                        (copy-recursively "data/images/unix/ui-hiragana.png" (string-append images-dir "/hiragana.png"))
+                        (copy-recursively "data/images/unix/ui-katakana_full.png" (string-append images-dir "/katakana_full.png"))
+                        (copy-recursively "data/images/unix/ui-katakana_half.png" (string-append images-dir "/katakana_half.png"))
+                        (copy-recursively "data/images/unix/ime_product_icon_opensource-32.png" (string-append images-dir "/product_icon.png"))
+                        (copy-recursively "data/images/unix/ui-properties.png" (string-append images-dir "/properties.png"))
+                        (copy-recursively "data/images/unix/ui-tool.png" (string-append images-dir "/tool.png"))        
+                        
+                        (mkdir-p applications-dir)
+                                    
+                        ;; setup-mozc.desktop の処理
+                        (let ((source-file (string-append desktop-files-source-dir "/setup-mozc.desktop"))
+                              (destination-file (string-append applications-dir "/setup-mozc.desktop")))
+                          (copy-file source-file destination-file)
+                          (substitute* destination-file
+                                       (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
+                                        (string-append "Exec=" exec-path " --mode=config_dialog"))
+                                       (("Icon=/usr/share/icons/mozc/product_icon_32bpp-128.png" _)
+                                        (string-append "Icon=" icon-path))))
                         #t)))))))))
 
 (define-public ibus-mozc
@@ -311,14 +345,17 @@ standard library.")
                       (let* ((out (assoc-ref outputs "out"))
                              (lib-dir (string-append out "/lib/ibus-mozc"))
                 	     (mozc-dir (string-append out "/lib/mozc"))
+                             (mozc-server-path (assoc-ref inputs "mozc-server"))
                              (share-dir (string-append out "/share/ibus/component"))
                              (images-dir (string-append out "/share/ibus-mozc"))
                              (applications-dir (string-append out "/share/applications"))
                              (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
                              (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
-                             (exec-path (string-append out "/lib/mozc/mozc_tool"))
                              (icon-path (string-append out "/share/ibus-mozc/product_icon.png"))
                 	     (version "2.28.4715.102"))
+                        (unless mozc-server-path
+                          (error "mozc-server input not found"))
+                        (define tool-exec-apth (string-append mozc-server-path "/lib/mozc/mozc_tool"))
                         ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
                         (mkdir-p lib-dir)
                         (mkdir-p mozc-dir)
@@ -327,20 +364,7 @@ standard library.")
 
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
-                        (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
-                        (copy-recursively "out_linux/Release/mozc_tool" (string-append mozc-dir "/mozc_tool"))
-                                                                    
-                        (copy-recursively "data/images/unix/ui-alpha_full.png" (string-append images-dir "/alpha_full.png"))
-                        (copy-recursively "data/images/unix/ui-alpha_half.png" (string-append images-dir "/alpha_half.png"))
-                        (copy-recursively "data/images/unix/ui-dictionary.png" (string-append images-dir "/dictionary.png"))
-                        (copy-recursively "data/images/unix/ui-direct.png" (string-append images-dir "/direct.png"))
-                        (copy-recursively "data/images/unix/ui-hiragana.png" (string-append images-dir "/hiragana.png"))
-                        (copy-recursively "data/images/unix/ui-katakana_full.png" (string-append images-dir "/katakana_full.png"))
-                        (copy-recursively "data/images/unix/ui-katakana_half.png" (string-append images-dir "/katakana_half.png"))
-                        (copy-recursively "data/images/unix/ime_product_icon_opensource-32.png" (string-append images-dir "/product_icon.png"))
-                        (copy-recursively "data/images/unix/ui-properties.png" (string-append images-dir "/properties.png"))
-                        (copy-recursively "data/images/unix/ui-tool.png" (string-append images-dir "/tool.png"))        
-                        
+
                         (substitute* (string-append "out_linux/Release/gen/unix/ibus/mozc.xml")
                                      (("/usr/lib/ibus-mozc/ibus-engine-mozc --ibus") 
                                       (string-append out "/lib/ibus-mozc/ibus-engine-mozc --ibus"))
@@ -351,24 +375,14 @@ standard library.")
                         (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
                         
                         (mkdir-p applications-dir)
-                                    
-                        ;; setup-mozc.desktop の処理
-                        (let ((source-file (string-append desktop-files-source-dir "/setup-mozc.desktop"))
-                              (destination-file (string-append applications-dir "/setup-mozc.desktop")))
-                          (copy-file source-file destination-file)
-                          (substitute* destination-file
-                                       (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
-                                        (string-append "Exec=" exec-path " --mode=config_dialog"))
-                                       (("Icon=/usr/share/icons/mozc/product_icon_32bpp-128.png" _)
-                                        (string-append "Icon=" icon-path))))
-                        
+
                         ;; ibus-setup-mozc-jp.desktop の処理（Execのパスのみ変更）
                         (let ((source-file (string-append desktop-files-source-dir "/ibus-setup-mozc-jp.desktop"))
                               (destination-file (string-append applications-dir "/ibus-setup-mozc-jp.desktop")))
                           (copy-file source-file destination-file)
                           (substitute* destination-file
                                        (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
-                                        (string-append "Exec=" exec-path " --mode=config_dialog"))))
+                                        (string-append "Exec=" tool-exec-apth " --mode=config_dialog"))))
                         #t)))))))
     (inputs
      `(("mozc-server" ,mozc-server)
