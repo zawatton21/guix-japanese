@@ -272,7 +272,7 @@ standard library.")
 
                       ;; bazelビルドスクリプトの実行
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "server/server.gyp:mozc_server")
+                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
                       #t))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -338,7 +338,7 @@ standard library.")
 
                       ;; bazelビルドスクリプトの実行
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
-                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
+                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc")
                       #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
