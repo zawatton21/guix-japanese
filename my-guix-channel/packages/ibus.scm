@@ -186,7 +186,7 @@ standard library.")
                                 ;; 依存関係のパスを定義
                                 (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
                                 (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
-                                (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
+                                (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils) "/bin"))
                                 (define findutils-bin (string-append (assoc-ref %build-inputs "findutils") "/bin"))
                                 (define grep-bin (string-append (assoc-ref %build-inputs "grep") "/bin"))
                                 (define sed-bin (string-append (assoc-ref %build-inputs "sed") "/bin"))
@@ -371,8 +371,9 @@ standard library.")
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
                         #t)))))))
-   (inputs
-    `(("ibus-mozc" ,ibus-mozc)))))
+    (inputs
+     (modify-inputs (package-native-inputs mozc-common)
+                    (append ("ibus-mozc" ,ibus-mozc))))))
 
 (define-public ibus-skk
   (package
