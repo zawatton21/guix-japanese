@@ -184,8 +184,6 @@ standard library.")
                      (replace 'configure
                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                 ;; 依存関係のパスを定義
-                                (define out (assoc-ref outputs "out"))
-                                (define mozc-dir (string-append out "/lib/mozc"))
                                 (define unzip-bin (string-append (assoc-ref %build-inputs "unzip") "/bin"))
                                 (define bash-bin (string-append (assoc-ref %build-inputs "bash") "/bin"))
                                 (define coreutils-bin (string-append (assoc-ref %build-inputs "coreutils") "/bin"))
@@ -198,7 +196,6 @@ standard library.")
                                 (define qttools-bin (string-append (assoc-ref %build-inputs "qttools") "/bin"))
                                 (define gettext-bin (string-append (assoc-ref %build-inputs "gettext") "/bin"))
                                 (define gtk2-bin (string-append (assoc-ref %build-inputs "gtk+") "/bin"))
-                                (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
                                 (define fcitx-bin (string-append (assoc-ref %build-inputs "fcitx") "/bin"))
                                 (define fcitx5-bin (string-append (assoc-ref %build-inputs "fcitx5") "/bin"))
                                 (define uim-bin (string-append (assoc-ref %build-inputs "uim") "/bin"))
@@ -217,8 +214,6 @@ standard library.")
 
                                 (chdir "src")
                                 (setenv "GYP_DEFINES" " use_libzinnia=1 use_libprotobuf=1 use_libabseil=1")
-                                ;; bazelビルドスクリプトの実行
-                                (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
                                 #t))
                      (delete 'check))))
    (native-inputs
@@ -270,7 +265,12 @@ standard library.")
         `(modify-phases ,phases
            (replace 'build
                     (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (define out (assoc-ref outputs "out"))
+                      (define mozc-dir (string-append out "/lib/mozc"))
+                      (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+
                       ;; bazelビルドスクリプトの実行
+                      (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
                       (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
                       #t))
            (replace 'install
@@ -349,7 +349,12 @@ standard library.")
         `(modify-phases ,phases
            (replace 'build
                     (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (define out (assoc-ref outputs "out"))
+                      (define mozc-dir (string-append (assoc-ref inputs "ibus-mozc") "/lib/mozc"))
+                      (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+
                       ;; bazelビルドスクリプトの実行
+                      (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
                       (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
                       #t))
            (replace 'install
@@ -360,7 +365,9 @@ standard library.")
                         (mkdir-p bin-dir)
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
-                        #t)))))))))
+                        #t)))))))
+   (inputs
+    `(("ibus-mozc" ,ibus-mozc)))))
 
 (define-public ibus-skk
   (package
