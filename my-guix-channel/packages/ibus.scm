@@ -255,10 +255,10 @@ standard library.")
    (home-page "https://github.com/google/mozc")
    (license gpl3+)))
 
-(define-public ibus-mozc
+(define-public mozc-server
   (package
     (inherit mozc-common)
-    (name "ibus-mozc")
+    (name "mozc-server")
     (arguments
      (substitute-keyword-arguments (package-arguments mozc-common)
        ((#:phases phases)
@@ -272,7 +272,39 @@ standard library.")
 
                       ;; bazelビルドスクリプトの実行
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
-                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "server/server.gyp:mozc_server" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
+                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "server/server.gyp:mozc_server")
+                      #t))
+           (replace 'install
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (let* ((out (assoc-ref outputs "out"))
+               	             (mozc-dir (string-append out "/lib/mozc")))
+                        (mkdir-p mozc-dir)
+
+                        ;; 実行ファイルやリソースファイルのコピー
+                        (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
+                        #t)))))))))
+
+(define-public ibus-mozc
+  (package
+    (inherit mozc-common)
+    (name "ibus-mozc")
+    (arguments
+     (substitute-keyword-arguments (package-arguments mozc-common)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (replace 'build
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (define out (assoc-ref outputs "out"))
+                      (let ((mozc-server-path (assoc-ref inputs "mozc-server")))
+                        (unless mozc-server-path
+                          (error "mozc-server input not found"))
+                      (define mozc-server-dir (string-append mozc-server-path "/lib/mozc"))
+                      (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+                      (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
+
+                      ;; bazelビルドスクリプトの実行
+                      (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
+                      (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/ibus/ibus.gyp:ibus_mozc" "renderer/renderer.gyp:mozc_renderer" "gui/gui.gyp:mozc_tool")
                       #t))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -296,7 +328,6 @@ standard library.")
                         ;; 実行ファイルやリソースファイルのコピー
                         (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
                         (copy-recursively "out_linux/Release/mozc_renderer" (string-append mozc-dir "/mozc_renderer"))
-                        (copy-recursively "out_linux/Release/mozc_server" (string-append mozc-dir "/mozc_server"))
                         (copy-recursively "out_linux/Release/mozc_tool" (string-append mozc-dir "/mozc_tool"))
                                                                     
                         (copy-recursively "data/images/unix/ui-alpha_full.png" (string-append images-dir "/alpha_full.png"))
@@ -338,7 +369,10 @@ standard library.")
                           (substitute* destination-file
                                        (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
                                         (string-append "Exec=" exec-path " --mode=config_dialog"))))
-                        #t)))))))))
+                        #t))))))))
+    (inputs
+     `(("mozc-server" ,mozc-server)
+       ,@(package-inputs mozc-common)))))
 
 (define-public mozc-emacs-helper
   (package
@@ -351,15 +385,15 @@ standard library.")
            (replace 'build
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (define out (assoc-ref outputs "out"))
-                      (let ((ibus-mozc-path (assoc-ref inputs "ibus-mozc")))
-                        (unless ibus-mozc-path
-                          (error "ibus-mozc input not found"))
-                        (define mozc-dir (string-append ibus-mozc-path "/lib/mozc"))
+                      (let ((mozc-server-path (assoc-ref inputs "mozc-server")))
+                        (unless mozc-server-path
+                          (error "mozc-server input not found"))
+                        (define mozc-server-dir (string-append mozc-server-path "/lib/mozc"))
                         (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
                         (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
 
                         ;; bazelビルドスクリプトの実行
-                        (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
+                        (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
                         (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/emacs/emacs.gyp:mozc_emacs_helper")
                         #t)))
            (replace 'install
@@ -372,7 +406,7 @@ standard library.")
                         (copy-recursively "out_linux/Release/mozc_emacs_helper" (string-append bin-dir "/mozc_emacs_helper"))
                         #t)))))))
     (inputs
-     `(("ibus-mozc" ,ibus-mozc) ; この行を修正しました
+     `(("mozc-server" ,mozc-server)
        ,@(package-inputs mozc-common)))))
 
 (define-public ibus-skk
