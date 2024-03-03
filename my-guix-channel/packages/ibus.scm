@@ -268,6 +268,7 @@ standard library.")
                       (define out (assoc-ref outputs "out"))
                       (define mozc-dir (string-append out "/lib/mozc"))
                       (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+                      (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
 
                       ;; bazelビルドスクリプトの実行
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
@@ -352,6 +353,7 @@ standard library.")
                       (define out (assoc-ref outputs "out"))
                       (define mozc-dir (string-append (assoc-ref inputs "ibus-mozc") "/lib/mozc"))
                       (define gyp-bin (string-append (assoc-ref %build-inputs "python-gyp") "/bin"))
+                      (setenv "PATH" (string-join (list gyp-bin (getenv "PATH")) ":"))
 
                       ;; bazelビルドスクリプトの実行
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-dir) "--target_platform=Linux" "--verbose")
