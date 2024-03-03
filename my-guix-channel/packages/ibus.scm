@@ -203,7 +203,7 @@ standard library.")
                                 (setenv "HOME" (getcwd)) ;; 現在の作業ディレクトリをホームディレクトリとして設定
                                 (setenv "PYTHON_BIN_PATH" (string-append (assoc-ref %build-inputs "python") "/bin"))
                                 ;; 環境変数pathにjdkのbinディレクトリと他のツールのパスを追加
-                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin gyp-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
+                                (setenv "PATH" (string-join (list uim-bin fcitx5-bin fcitx-bin gtk2-bin gettext-bin qtbase-bin qttools-bin which-bin python-bin sed-bin grep-bin findutils-bin coreutils-bin unzip-bin bash-bin (getenv "PATH")) ":"))
                                 (setenv "PKG_CONFIG_PATH"
                                         (string-join
                                          (list (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
