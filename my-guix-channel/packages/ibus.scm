@@ -143,9 +143,9 @@ standard library.")
    (description "This package provides the Debian patches for mozc.")
    (license gpl2+)))
 
-(define mozc
+(define mozc-common
   (package
-   (name "mozc")
+   (name "mozc-common")
    (version "2.28.4715.102")
    (source (origin
             (method url-fetch)
@@ -262,10 +262,10 @@ standard library.")
 
 (define-public ibus-mozc
   (package
-    (inherit mozc)
+    (inherit mozc-common)
     (name "ibus-mozc")
     (arguments
-     (substitute-keyword-arguments (package-arguments mozc)
+     (substitute-keyword-arguments (package-arguments mozc-common)
        ((#:phases phases)
         `(modify-phases ,phases
            (replace 'build
@@ -341,10 +341,10 @@ standard library.")
 
 (define-public mozc-emacs-helper
   (package
-    (inherit mozc)
+    (inherit mozc-common)
     (name "mozc-emacs-helper")
     (arguments
-     (substitute-keyword-arguments (package-arguments mozc)
+     (substitute-keyword-arguments (package-arguments mozc-common)
        ((#:phases phases)
         `(modify-phases ,phases
            (replace 'build
