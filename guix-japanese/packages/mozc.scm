@@ -150,6 +150,7 @@
       ("qtbase" ,qtbase-5)
       ("qttools" ,qttools-5)
       ("gettext" ,gnu-gettext)
+      ("sed" ,sed)
       ("xdg-utils" ,xdg-utils)
       ("zip" ,zip)
       ("unzip" ,unzip)

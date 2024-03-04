@@ -62,10 +62,7 @@
                       #t)))
            (add-after 'build 'compile-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
-                        (let* ((out (assoc-ref outputs "out"))
-                               (share-dir (string-append out "/share"))
-                               (metainfo-dir (string-append share-dir "/metainfo"))
-                               (po-dir "unix/fcitx5/po/")
+                        (let* ((po-dir "unix/fcitx5/po/")
                                (mo-dir (string-append (assoc-ref outputs "out") "/share/locale")))
 
                           (for-each (lambda (lang)
@@ -76,12 +73,11 @@
                                     '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW"))
 
                           ;; .in ファイルから .xml ファイルを生成
-                          (let ((in-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in")
-                                (out-file (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
-                            (mkdir-p metainfo-dir)
-                            (invoke "sed"
-                                    "-e" "s|@VERSION@|2.28.4715.102|g" ;; ここで必要な置換を行う
-                                    in-file ">" out-file))
+                          ;;(let ((in-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in")
+                          ;;      (out-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
+                          ;;  (invoke "sed"
+                          ;;          "-e" "s|@VERSION@|2.28.4715.102|g" ;; ここで必要な置換を行う
+                          ;;          in-file ">" out-file))
                           #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -117,10 +113,14 @@
                         (copy-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
 
                         #t)))))))
+    (native-inputs
+     `(("sed" ,sed)
+       ,@(package-native-inputs mozc-server)))
     (inputs
      `(("mozc-server" ,mozc-server)
        ("fcitx5" ,fcitx5)
-       ,@(package-inputs mozc-server)))))
+       ,@(package-inputs mozc-server)))
+))
 
 (define-public fcitx5-skk
   (package
