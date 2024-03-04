@@ -218,19 +218,19 @@
                                   (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
                                          (qtbase-dir (string-append (assoc-ref inputs "qtbase") "/lib/cmake"))
                                          (qtbase-lib-dir (string-append (assoc-ref inputs "qtbase") "/lib"))
-                                         (mesa-lib-dir (string-append (assoc-ref inputs "mesa") "/lib")) ;; mesaのライブラリディレクトリ
-                                         (mesa-include-dir (string-append (assoc-ref inputs "mesa") "/include")) ;; mesaのインクルードディレクトリ
+                                         (mesa-lib-dir (string-append (assoc-ref inputs "mesa") "/lib"))
+                                         ;;(mesa-include-dir (string-append (assoc-ref inputs "mesa") "/include"))
+                                         (libglvnd-lib-dir (string-append (assoc-ref inputs "libglvnd") "/lib"))
                                          (pkg-config-path (string-join
                                                            (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
                                                                  (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                                  (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
-                                                                 (string-append (assoc-ref inputs "mesa") "/lib/pkgconfig") ;; mesaのpkgconfigパスを追加
+                                                                 (string-append (assoc-ref inputs "mesa") "/lib/pkgconfig")
+                                                                 (string-append (assoc-ref inputs "libglvnd") "/lib/pkgconfig")
                                                                  (or (getenv "PKG_CONFIG_PATH") ""))
                                                            ":")))
                                     ;; CMAKE_PREFIX_PATHにECM、QtBase、mesaのパスを追加
-                                    (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir mesa-lib-dir) ":"))
-                                    ;; LD_LIBRARY_PATHにQtBaseとmesaのライブラリディレクトリを追加
-                                    (setenv "LD_LIBRARY_PATH" (string-join (list qtbase-lib-dir mesa-lib-dir (or (getenv "LD_LIBRARY_PATH") "")) ":"))
+                                    (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir mesa-lib-dir libglvnd-lib-dir) ":"))
                                     ;; PKG_CONFIG_PATHを設定
                                     (setenv "PKG_CONFIG_PATH" pkg-config-path)
                                     #t))))))
@@ -244,6 +244,7 @@
      ("fcitx5-qt" ,fcitx5-qt)
      ("qtbase" ,qtbase)
      ("mesa" ,mesa)
+     ("libglvnd" ,libglvnd)
      ("automake" ,automake)
      ("cmake" ,cmake)
      ("autoconf" ,autoconf)
