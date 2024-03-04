@@ -218,6 +218,13 @@
 ))
      #:phases
      (modify-phases %standard-phases
+                    (add-after 'unpack 'fix-dictionary-path
+                               (lambda* (#:key outputs #:allow-other-keys)
+                                 (let* ((src (getcwd))) ;; 現在の作業ディレクトリを取得
+                                   (substitute* (string-append src "/data/dictionary_list")
+                                                (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly")
+                                                 "type=file,file=%s/ibus-skk/user.dict,mode=readwrite\".printf(Environment.get_user_config_dir())"))
+                                   #t)))
                     (add-before 'configure 'modify-cmakelists
                                 (lambda _ 
                                   (substitute* "CMakeLists.txt"
@@ -248,13 +255,6 @@
                                     ;; PKG_CONFIG_PATHを設定
                                     (setenv "PKG_CONFIG_PATH" pkg-config-path)
                                     #t)))
-                    (add-after 'unpack 'fix-dictionary-path
-                               (lambda* (#:key outputs #:allow-other-keys)
-                                 (let* ((src (assoc-ref %build-inputs "src")))
-                                   (substitute* (string-append src "/data/dictionary_list")
-                                                (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly")
-                                                 "type=file,file=%s/share/skk/SKK-JISYO.L,mode=readonly\".printf\\(Environment.get_user_config_dir\\(\\)\\)"))
-                                  #t)))
                     )))
   (propagated-inputs
    (list libskk))
