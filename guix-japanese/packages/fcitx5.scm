@@ -206,11 +206,16 @@
      #:configure-flags
      (let* ((out (assoc-ref %outputs "out"))
             (libskk-lib-dir (string-append (assoc-ref %build-inputs "libskk") "/lib"))
-            (libskk-include-dir (string-append (assoc-ref %build-inputs "libskk") "/include/libskk")))
+            (libskk-include-dir (string-append (assoc-ref %build-inputs "libskk") "/include/libskk"))
+            (mesa-include-dir (string-append (assoc-ref inputs "mesa") "/include"))
+)
        (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
              "-DBUILD_SHARED_LIBS=ON"
              (string-append "-DLIBSKK_LIBRARIES=" libskk-lib-dir "/libskk.so")
-             (string-append "-DLIBSKK_INCLUDE_DIR=" libskk-include-dir)))
+             (string-append "-DLIBSKK_INCLUDE_DIR=" libskk-include-dir)
+             (string-append "-DOPENGL_INCLUDE_DIR=" mesa-include-dir)
+
+))
      #:phases
      (modify-phases %standard-phases
                     (add-before 'configure 'set-environment-variables
