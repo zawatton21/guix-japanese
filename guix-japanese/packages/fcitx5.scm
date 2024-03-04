@@ -40,7 +40,7 @@
 
 (define-public fcitx5-mozc
   (package
-    (inherit mozc-common)
+    (inherit mozc-server)
     (name "fcitx5-mozc")
     (arguments
      (substitute-keyword-arguments (package-arguments mozc-common)

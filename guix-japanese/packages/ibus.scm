@@ -40,7 +40,7 @@
 
 (define-public ibus-mozc
   (package
-    (inherit mozc-common)
+    (inherit mozc-server)
     (name "ibus-mozc")
     (arguments
      (substitute-keyword-arguments (package-arguments mozc-common)
