@@ -62,7 +62,8 @@
                       #t)))
            (add-after 'build 'compile-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
-                        (let* ((po-dir "unix/fcitx5/po/"))
+                        (let* ((po-dir "unix/fcitx5/po/")
+                               (in-dir "unix/fcitx5/"))
 
                           (for-each (lambda (lang)
                                       (let* ((po-file (string-append po-dir lang ".po"))
@@ -72,11 +73,11 @@
                                     '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW"))
 
                           ;; .in ファイルから .xml ファイルを生成
-                          ;;(let ((in-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in")
-                          ;;      (out-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
-                          ;;  (invoke "sed"
-                          ;;          "-e" "s|@VERSION@|2.28.4715.102|g" ;; ここで必要な置換を行う
-                          ;;          in-file ">" out-file))
+                          (let ((in-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in"))
+                                (out-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
+                            (invoke "sed"
+                                    "-e" "s|@VERSION@|2.28.4715.102|g" ;; ここで必要な置換を行う
+                                    in-file ">" out-file))
                           #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -109,7 +110,7 @@
 
                         ;; メタ情報のインストール
                         (mkdir-p metainfo-dir)
-                        (copy-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
+                        (copy-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
 
                         #t)))))))
     (native-inputs
