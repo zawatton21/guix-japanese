@@ -83,7 +83,7 @@
                         ;; 翻訳ファイルのインストール
                         (let ((po-files '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW")))
                           (for-each (lambda (lang)
-                                      (let ((mo-file-path (string-append "unix/fcitx5/po/" lang ".mo"))
+                                      (let ((mo-file-path (string-append "unix/fcitx5/po/" lang ".po"))
                                             (target-dir (string-append locale-dir "/" lang "/LC_MESSAGES")))
                                         (mkdir-p target-dir)
                                         (copy-file mo-file-path (string-append target-dir "/fcitx5-mozc.mo"))))
