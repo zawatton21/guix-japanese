@@ -207,7 +207,7 @@
      (let* ((out (assoc-ref %outputs "out"))
             (libskk-lib-dir (string-append (assoc-ref %build-inputs "libskk") "/lib"))
             (libskk-include-dir (string-append (assoc-ref %build-inputs "libskk") "/include/libskk"))
-            (mesa-include-dir (string-append (assoc-ref inputs "mesa") "/include"))
+            (mesa-include-dir (string-append (assoc-ref %build-inputs "mesa") "/include"))
 )
        (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
              "-DBUILD_SHARED_LIBS=ON"
