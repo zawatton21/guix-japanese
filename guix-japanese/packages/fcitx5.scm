@@ -220,9 +220,9 @@
      (modify-phases %standard-phases
                     (add-before 'configure 'modify-cmakelists
                                 (lambda _ 
-                                  ;(substitute* "CMakeLists.txt"
-                                  ;             (("option\\(ENABLE_QT \"Enable Qt for GUI configuration\" On\\)")
-         ;                                       "option(ENABLE_QT \"Enable Qt for GUI configuration\" Off)"))
+                                  (substitute* "CMakeLists.txt"
+                                               (("option\\(ENABLE_QT \"Enable Qt for GUI configuration\" On\\)")
+                                                "option(ENABLE_QT \"Enable Qt for GUI configuration\" Off)"))
                                   (substitute* "CMakeLists.txt"
                                                (("option\\(USE_QT6 \"Build against Qt6\" On\\)")
                                                 "option(USE_QT6 \"Build against Qt6\" Off)"))
