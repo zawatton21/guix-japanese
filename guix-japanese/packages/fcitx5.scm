@@ -188,51 +188,24 @@
 (define-public fcitx5-skk
   (package
    (name "fcitx5-skk")
-   (version "1.4.3")
+   (version "5.1.2")
   (source (origin
            (method git-fetch)
   	   (uri (git-reference
-  		 (url "https://github.com/ueno/ibus-skk.git")
-		 (commit "ibus-skk-1.4.3")))
+  		 (url "https://github.com/fcitx/fcitx5-skk.git")
+		 (commit "5.1.2")))
            (sha256
             (base32
 	     "19s8m6dsyd90jlwd4vqgwvs7rfsjcvb83wh0k3bxx7sxqz7wyk11"))))
-  (build-system gnu-build-system)
-  (arguments
-   `(#:phases
-     (modify-phases %standard-phases
-                    ;; Modify src/skk.xml.in.in. Set the Keyboard layout to default. 
-                    (add-after 'unpack 'modify-skk-xml
-                               (lambda _
-                                 (substitute* "src/skk.xml.in.in"
-                                              (("<layout>jp</layout>")
-                                               "<layout>default</layout>"))
-                                 #t))
-                    ;; Change encoding in src/engine.vala
-                    (add-after 'unpack 'modify-engine-vala
-                               (lambda _
-                                 (substitute* "src/engine.vala"
-                                              (("var encoding = plist.get \\(\"encoding\"\\) \\?\\? \"EUC-JP\";")
-                                               "var encoding = plist.get (\"encoding\") ?? \"UTF-8\";"))
-                                 #t))
-                    ;; Modify src/preferences.vala for dictionary path
-                    (add-after 'unpack 'modify-preferences-vala
-                               (lambda _
-                                 (substitute* "src/preferences.vala"
-                                              (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly\"")
-                                               "type=file,file=/home/madblack-21/.guix-profile/share/skk/SKK-JISYO.L,mode=readonly\""))
-                                 #t))
-                    
-                    ;; Generate a configure file
-                    (add-before 'configure 'pre-configure
-                                (lambda _ ; TODO: add explanation
-                                  (zero? (system* "sh" "./autogen.sh")))))))
+  (build-system cmake-build-system)
   (propagated-inputs
    (list libskk))
   (native-inputs
    `(("libgee" ,libgee)
      ("libskk" ,libskk)
-     ("ibus" ,ibus)
+     ("fcitx5" ,fcitx5)
+     ("fcitx5-qt" ,fcitx5-qt)
+     ("qtbase" ,qtbase)
      ("automake" ,automake)
      ("autoconf" ,autoconf)
      ("intltool" ,intltool)
@@ -246,10 +219,10 @@
    `(("gtk+" ,gtk+)
      ("libgee" ,libgee)
      ("libskk" ,libskk)
-     ("ibus" ,ibus)
+     ("fcitx5" ,fcitx5)
      ("skktools" ,skktools)
      ("skk-jisyo" ,skk-jisyo)))
-  (synopsis "a Japanese SKK input engine for IBus")
-  (description "ibus-skk is an implementation of the SKK (Simple Kana-Kanji) input method on the IBus input method framework. Note that SKK works quite differently from other Japanese input methods.")
-  (home-page "https://github.com/ueno/ibus-skk")
+  (synopsis "a Japanese SKK input engine for Fcitx5")
+  (description "fcitx5-skk is an input method engine for Fcitx5, which uses libskk as its backend..")
+  (home-page "https://github.com/fcitx/fcitx5-skk")
   (license gpl2+)))
