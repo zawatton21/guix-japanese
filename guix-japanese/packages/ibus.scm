@@ -144,7 +144,7 @@
                                (lambda* (#:key outputs #:allow-other-keys)
                                  (substitute* "src/preferences.vala"
                                               (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly\"")
-                                                "type=file,file=%s/ibus-skk/user.dict,mode=readwrite\".printf(Environment.get_user_config_dir())"))
+                                                "type=file,file=%s/share/skk/SKK-JISYO.L,mode=readonly\".printf(System.getenv(\"HOME\") + \"/.guix-profile\")")))
                                  ))
                     ;; Generate a configure file
                     (add-before 'configure 'pre-configure
