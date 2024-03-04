@@ -202,10 +202,14 @@
   (arguments
      `(#:modules ((guix build cmake-build-system)
                   (guix build utils))
-       #:configure-flags
-       (let* ((out (assoc-ref %outputs "out")))
-         (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-               "-DBUILD_SHARED_LIBS=ON"))
+     #:configure-flags
+     (let* ((out (assoc-ref %outputs "out"))
+            (libskk-lib-dir (string-append (assoc-ref %build-inputs "libskk") "/lib"))
+            (libskk-include-dir (string-append (assoc-ref %build-inputs "libskk") "/include/libskk")))
+       (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+             "-DBUILD_SHARED_LIBS=ON"
+             (string-append "-DLIBSKK_LIBRARIES=" libskk-lib-dir "/libskk.so")
+             (string-append "-DLIBSKK_INCLUDE_DIR=" libskk-include-dir)))
        #:phases
        (modify-phases %standard-phases
                       (add-before 'configure 'set-environment-variables
