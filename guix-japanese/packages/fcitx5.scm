@@ -229,6 +229,7 @@
      ("fcitx5-qt" ,fcitx5-qt)
      ("qtbase" ,qtbase)
      ("automake" ,automake)
+     ("cmake" ,cmake)
      ("autoconf" ,autoconf)
      ("intltool" ,intltool)
      ("which" ,which)
