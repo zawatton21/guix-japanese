@@ -60,7 +60,7 @@
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
                       (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/fcitx5/fcitx5.gyp:fcitx5-mozc")
                       #t)))
-           (add-after 'build 'compile-po-files
+           (add-after 'build 'compile-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
                         (let* ((po-dir "unix/fcitx5/po/")
                                (mo-dir (string-append (assoc-ref outputs "out") "/share/locale")))
@@ -70,6 +70,14 @@
                                         (mkdir-p (dirname mo-file))
                                         (invoke "msgfmt" po-file "-o" mo-file)))
                                     '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW"))
+
+                          ;; .in ファイルから .xml ファイルを生成
+                          (let ((in-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in")
+                                (out-file (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
+                            (mkdir-p metainfo-dir)
+                            (invoke "sed"
+                                    "-e" "s|@VERSION@|2.28.4715.102|g" ;; ここで必要な置換を行う
+                                    in-file ">" out-file))
                           #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
