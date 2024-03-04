@@ -253,8 +253,8 @@
                                  (let* ((src (assoc-ref %build-inputs "src")))
                                    (substitute* (string-append src "/data/dictionary_list")
                                                 (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly")
-                                                 "type=file,file=%s/share/skk/SKK-JISYO.L,mode=readonly\".printf(Environment.get_user_config_dir())")))
-                                 #t)))
+                                                 "type=file,file=%s/share/skk/SKK-JISYO.L,mode=readonly\".printf\\(Environment.get_user_config_dir\\(\\)\\)"))
+                                  #t)))
                     )))
   (propagated-inputs
    (list libskk))
