@@ -18,6 +18,7 @@
   #:use-module  (gnu packages compression)
   #:use-module  (gnu packages language)
   #:use-module  (gnu packages glib)
+  #:use-module  (gnu packages gl)
   #:use-module  (gnu packages gnome)
   #:use-module  (gnu packages bash)
   #:use-module  (gnu packages gtk)
@@ -217,16 +218,17 @@
                                     (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
                                            (qtbase-dir (string-append (assoc-ref inputs "qtbase") "/lib/cmake"))
                                            (qtbase-lib-dir (string-append (assoc-ref inputs "qtbase") "/lib"))
-                                           (fcitx5qt-dir (string-append (assoc-ref inputs "fcitx5-qt") "/lib/cmake"))
+                                           (mesa-dir (string-append (assoc-ref inputs "llvm-for-mesa") "/lib/cmake"))
                                            (pkg-config-path (string-join
                                                              (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
                                                                    (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                                    (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                                                   ;;(string-append (assoc-ref inputs "mesa") "/lib/pkgconfig")
                                                                    ;; getenvが#fを返す場合、空文字列を使用
                                                                    (or (getenv "PKG_CONFIG_PATH") ""))
                                                              ":")))
                                       ;; CMAKE_PREFIX_PATHにECMとQtBaseのcmakeディレクトリを追加
-                                      (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir fcitx5qt-dir) ":"))
+                                      (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir mesa-dir) ":"))
                                       ;; LD_LIBRARY_PATHにQtBaseのlibディレクトリを追加
                                       ;; getenvが#fを返す場合、空文字列を使用
                                       (setenv "LD_LIBRARY_PATH" (string-join (list qtbase-lib-dir (or (getenv "LD_LIBRARY_PATH") "")) ":"))
@@ -243,6 +245,7 @@
      ("fcitx5" ,fcitx5)
      ("fcitx5-qt" ,fcitx5-qt)
      ("qtbase" ,qtbase)
+     ("llvm-for-mesa" ,llvm-for-mesa)
      ("automake" ,automake)
      ("cmake" ,cmake)
      ("autoconf" ,autoconf)
