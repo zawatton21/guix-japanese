@@ -217,13 +217,12 @@
 ))
      #:phases
      (modify-phases %standard-phases
-                    (add-after 'unpack 'modify-cmakelists
-                               (lambda _ 
-                                 ;; CMakeLists.txt内のUSE_QT6オプションをOffに変更
-                                 (substitute* "CMakeLists.txt"
-                                                   (("option(USE_QT6 \"Build against Qt6\" On)")
-                                                    "option(USE_QT6 \"Build against Qt6\" Off)"))
-                                 #t))
+                    (add-before 'configure 'modify-cmakelists
+                                (lambda _ 
+                                  (substitute* "CMakeLists.txt"
+                                               (("option\\(USE_QT6 \"Build against Qt6\" On\\)")
+                                                "option(USE_QT6 \"Build against Qt6\" Off)"))
+                                  #t))
                     (add-before 'configure 'set-environment-variables
                                 (lambda* (#:key inputs outputs #:allow-other-keys)
                                   (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
