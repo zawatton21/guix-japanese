@@ -242,7 +242,7 @@
      ("libskk" ,libskk)
      ("fcitx5" ,fcitx5)
      ("fcitx5-qt" ,fcitx5-qt)
-     ("qtbase" ,qtbase-5)
+     ("qtbase" ,qtbase)
      ("automake" ,automake)
      ("cmake" ,cmake)
      ("autoconf" ,autoconf)
