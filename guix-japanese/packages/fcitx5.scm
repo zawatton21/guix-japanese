@@ -254,9 +254,12 @@
                                         (home (getenv "HOME"))
                                         (dictionary-path (string-append out "/share/fcitx5/skk/dictionary_list"))
                                         (new-path (string-append home "/.guix-profile/share/skk/SKK-JISYO.L")))
-                                   (when (file-exists? dictionary-path)
-                                     (substitute* dictionary-path
-                                                  ((("/usr/share/skk/SKK-JISYO.L") new-path))))
+                                   (if (file-exists? dictionary-path)
+                                       (begin
+                                         (substitute* dictionary-path
+                                                      ((("/usr/share/skk/SKK-JISYO.L") new-path)))
+                                         (display "Dictionary path updated.\n"))
+                                       (display "Dictionary path does not exist; no changes made.\n"))
                                    #t)))
                     )))
   (propagated-inputs
