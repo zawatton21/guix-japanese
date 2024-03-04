@@ -202,7 +202,10 @@
   (build-system cmake-build-system)
   (arguments
    `(#:modules ((guix build cmake-build-system)
-                (guix build utils))
+                (guix build utils)
+                ((guix build gexp) #:prefix gexp:) ; substitute*関数のために必要
+                (srfi srfi-1)
+                (ice-9 regex))
      #:configure-flags
      (let* ((out (assoc-ref %outputs "out"))
             (libskk-lib-dir (string-append (assoc-ref %build-inputs "libskk") "/lib"))
@@ -211,7 +214,6 @@
 )
        (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
              "-DBUILD_SHARED_LIBS=ON"
-             "-DQT_MAJOR_VERSION=5"
              (string-append "-DLIBSKK_LIBRARIES=" libskk-lib-dir "/libskk.so")
              (string-append "-DLIBSKK_INCLUDE_DIR=" libskk-include-dir)
              (string-append "-DOPENGL_INCLUDE_DIR=" mesa-include-dir)
@@ -219,6 +221,13 @@
 ))
      #:phases
      (modify-phases %standard-phases
+                    (add-after 'unpack 'modify-cmakelists
+                               (lambda _ 
+                                 ;; CMakeLists.txt内のUSE_QT6オプションをOffに変更
+                                 (gexp:substitute* "CMakeLists.txt"
+                                                   (("option\\(USE_QT6 \"Build against Qt6\" On\\)")
+                                                    "option(USE_QT6 \"Build against Qt6\" Off)"))
+                                 #t))
                     (add-before 'configure 'set-environment-variables
                                 (lambda* (#:key inputs outputs #:allow-other-keys)
                                   (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
