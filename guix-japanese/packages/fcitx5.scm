@@ -196,7 +196,7 @@
 		 (commit "5.1.2")))
            (sha256
             (base32
-	     "19s8m6dsyd90jlwd4vqgwvs7rfsjcvb83wh0k3bxx7sxqz7wyk11"))))
+	     "0c2din7gr2bskh0wn33i4q1jpvccsjq94xad5714i8frkz6gs3my"))))
   (build-system cmake-build-system)
   (propagated-inputs
    (list libskk))
