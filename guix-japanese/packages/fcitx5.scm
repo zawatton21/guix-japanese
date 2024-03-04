@@ -221,8 +221,8 @@
                     (add-after 'unpack 'fix-dictionary-path
                                (lambda* (#:key outputs #:allow-other-keys)
                                  (substitute* "src/dictionary_list"
-                                              (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly"
-                                                "type=file,file=%s/ibus-skk/user.dict,mode=readwrite\".printf(Environment.get_user_config_dir())")))
+                                              (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly")
+                                                "type=file,file=%s/ibus-skk/user.dict,mode=readwrite\".printf(Environment.get_user_config_dir())"))
                                  ))
                     (add-before 'configure 'modify-cmakelists
                                 (lambda _ 
