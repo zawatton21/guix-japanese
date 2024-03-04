@@ -251,11 +251,12 @@
                     (add-after 'install 'fix-dictionary-path
                                (lambda* (#:key outputs #:allow-other-keys)
                                  (let* ((out (assoc-ref outputs "out"))
-                                        (dictionary-path (string-append out "/share/fcitx5/skk/dictionary_list")))
+                                        (home (getenv "HOME"))
+                                        (dictionary-path (string-append out "/share/fcitx5/skk/dictionary_list"))
+                                        (new-path (string-append home "/.guix-profile/share/skk/SKK-JISYO.L")))
                                    (when (file-exists? dictionary-path)
                                      (substitute* dictionary-path
-                                                  (("/usr/share/skk/SKK-JISYO.L")
-                                                   "/home/madblack-21/.guix-profile/share/skk/SKK-JISYO.L")))
+                                                  ((("/usr/share/skk/SKK-JISYO.L") new-path))))
                                    #t)))
                     )))
   (propagated-inputs
