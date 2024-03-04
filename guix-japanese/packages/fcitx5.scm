@@ -207,7 +207,7 @@
      (let* ((out (assoc-ref %outputs "out"))
             (libskk-lib-dir (string-append (assoc-ref %build-inputs "libskk") "/lib"))
             (libskk-include-dir (string-append (assoc-ref %build-inputs "libskk") "/include/libskk"))
-            (mesa-include-dir (string-append (assoc-ref %build-inputs "mesa") "/include/GL"))
+            (mesa-include-dir (string-append (assoc-ref %build-inputs "mesa") "/include"))
 )
        (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
              "-DBUILD_SHARED_LIBS=ON"
@@ -219,6 +219,9 @@
      (modify-phases %standard-phases
                     (add-before 'configure 'modify-cmakelists
                                 (lambda _ 
+                                  (substitute* "CMakeLists.txt"
+                                               (("option\\(ENABLE_QT \"Enable Qt for GUI configuration\" On\\)")
+                                                "option(ENABLE_QT \"Enable Qt for GUI configuration\" On)"))
                                   (substitute* "CMakeLists.txt"
                                                (("option\\(USE_QT6 \"Build against Qt6\" On\\)")
                                                 "option(USE_QT6 \"Build against Qt6\" Off)"))
