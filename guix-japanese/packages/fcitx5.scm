@@ -19,6 +19,7 @@
   #:use-module  (gnu packages language)
   #:use-module  (gnu packages glib)
   #:use-module  (gnu packages gl)
+  #:use-module  (gnu packages llvm)
   #:use-module  (gnu packages gnome)
   #:use-module  (gnu packages bash)
   #:use-module  (gnu packages gtk)
