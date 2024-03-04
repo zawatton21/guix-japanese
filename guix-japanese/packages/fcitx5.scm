@@ -247,7 +247,17 @@
                                     (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir mesa-lib-dir libglvnd-lib-dir) ":"))
                                     ;; PKG_CONFIG_PATHを設定
                                     (setenv "PKG_CONFIG_PATH" pkg-config-path)
-                                    #t))))))
+                                    #t)))
+                    (add-after 'install 'fix-dictionary-path
+                               (lambda* (#:key outputs #:allow-other-keys)
+                                 (let* ((out (assoc-ref outputs "out"))
+                                        (dictionary-path (string-append out "/share/fcitx5/skk/dictionary_list")))
+                                   (when (file-exists? dictionary-path)
+                                     (substitute* dictionary-path
+                                                  (("/usr/share/skk/SKK-JISYO.L")
+                                                   (string-append out "/share/skk/SKK-JISYO.L"))))
+                                   #t)))
+                    )))
   (propagated-inputs
    (list libskk))
   (native-inputs
