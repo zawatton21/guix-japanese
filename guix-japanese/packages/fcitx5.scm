@@ -208,6 +208,7 @@
                                         (pkg-config (string-append (assoc-ref inputs "pkg-config") "/bin")))
                                     ;; 環境変数PATHにecmのbinディレクトリを追加
                                     (setenv "PATH" (string-append ecm-bin ":" pkg-config ":" (getenv "PATH")))
+                                    (setenv "CMAKE_PREFIX_PATH" ecm-path)
                                     ;; PKG_CONFIG_PATHの設定
                                     (setenv "PKG_CONFIG_PATH"
                                             (string-join
