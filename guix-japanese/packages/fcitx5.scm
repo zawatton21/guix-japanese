@@ -104,13 +104,12 @@
                         ;; .in ファイルから .xml ファイルを生成
                         (let ((in-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in"))
                               (out-file (string-append metainfo-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
-                          (mkdir-p (dirname out-file))
-                          (call-with-output-file out-file
-                            (lambda (port)
-                              (invoke "sed"
-                                      "-e" "s|@VERSION@|2.28.4715.102|g"
-                                      in-file)
-                              (dump-port (current-output-port) port))))
+                          (mkdir-p metainfo-dir)
+                          (system* "sed"
+                                   "-e" "s|@VERSION@|2.28.4715.102|g"
+                                   "-i" "" ; インプレース編集を行い、元のファイルを変更する
+                                   in-file)
+                          (copy-file in-file out-file))
                         #t)))))))
     (inputs
      `(("mozc-server" ,mozc-server)
