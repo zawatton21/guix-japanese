@@ -255,7 +255,7 @@
                                    (when (file-exists? dictionary-path)
                                      (substitute* dictionary-path
                                                   (("/usr/share/skk/SKK-JISYO.L")
-                                                   (string-append out "/share/skk/SKK-JISYO.L"))))
+                                                   "~./guix-profile/share/skk/SKK-JISYO.L")))
                                    #t)))
                     )))
   (propagated-inputs
