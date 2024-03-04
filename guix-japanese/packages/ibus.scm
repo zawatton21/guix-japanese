@@ -43,7 +43,7 @@
     (inherit mozc-server)
     (name "ibus-mozc")
     (arguments
-     (substitute-keyword-arguments (package-arguments mozc-common)
+     (substitute-keyword-arguments (package-arguments mozc-server)
        ((#:phases phases)
         `(modify-phases ,phases
            (replace 'build
@@ -107,7 +107,7 @@
     (inputs
      `(("mozc-server" ,mozc-server)
        ("ibus" ,ibus)
-       ,@(package-inputs mozc-common)))))
+       ,@(package-inputs mozc-server)))))
 
 (define-public ibus-skk
   (package

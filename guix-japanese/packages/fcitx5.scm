@@ -43,7 +43,7 @@
     (inherit mozc-server)
     (name "fcitx5-mozc")
     (arguments
-     (substitute-keyword-arguments (package-arguments mozc-common)
+     (substitute-keyword-arguments (package-arguments mozc-server)
        ((#:phases phases)
         `(modify-phases ,phases
            (replace 'build
@@ -97,7 +97,7 @@
     (inputs
      `(("mozc-server" ,mozc-server)
        ("fcitx5" ,fcitx5)
-       ,@(package-inputs mozc-common)))))
+       ,@(package-inputs mozc-server)))))
 
 (define-public fcitx5-skk
   (package
