@@ -208,27 +208,25 @@
                "-DBUILD_SHARED_LIBS=ON"))
        #:phases
        (modify-phases %standard-phases
-(add-before 'configure 'set-environment-variables
-  (lambda* (#:key inputs outputs #:allow-other-keys)
-    (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
-           (qtbase-dir (string-append (assoc-ref inputs "qtbase") "/lib/cmake"))
-           (qtbase-lib-dir (string-append (assoc-ref inputs "qtbase") "/lib"))
-           (pkg-config-path (string-join
-                             (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
-                                   (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
-                                   (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
-                                   (getenv "PKG_CONFIG_PATH"))
-                             ":")))
-      ;; CMAKE_PREFIX_PATHにECMとQtBaseのcmakeディレクトリを追加
-      (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir) ":"))
-      ;; LD_LIBRARY_PATHにQtBaseのlibディレクトリを追加
-      (setenv "LD_LIBRARY_PATH" (string-join (list qtbase-lib-dir (getenv "LD_LIBRARY_PATH")) ":"))
-      ;; PKG_CONFIG_PATHを設定
-      (setenv "PKG_CONFIG_PATH" pkg-config-path)
-      #t)))
-)))
-
-
+                      (add-before 'configure 'set-environment-variables
+                                  (lambda* (#:key inputs outputs #:allow-other-keys)
+                                    (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
+                                           (qtbase-dir (string-append (assoc-ref inputs "qtbase") "/lib/cmake"))
+                                           (qtbase-lib-dir (string-append (assoc-ref inputs "qtbase") "/lib"))
+                                           (pkg-config-path (string-join
+                                                             (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
+                                                                   (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
+                                                                   (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                                                   (getenv "PKG_CONFIG_PATH"))
+                                                             ":")))
+                                      ;; CMAKE_PREFIX_PATHにECMとQtBaseのcmakeディレクトリを追加
+                                      (setenv "CMAKE_PREFIX_PATH" (string-join (list ecm-dir qtbase-dir) ":"))
+                                      ;; LD_LIBRARY_PATHにQtBaseのlibディレクトリを追加
+                                      (setenv "LD_LIBRARY_PATH" (string-join (list qtbase-lib-dir (getenv "LD_LIBRARY_PATH")) ":"))
+                                      ;; PKG_CONFIG_PATHを設定
+                                      (setenv "PKG_CONFIG_PATH" pkg-config-path)
+                                      #t)))
+                      )))
   (propagated-inputs
    (list libskk))
   (native-inputs
