@@ -116,7 +116,7 @@
                         (let* ((out (assoc-ref outputs "out"))
                                (share-dir (string-append out "/share"))
                                (icons-dir (string-append share-dir "/icons/hicolor"))
-                               (mozc-icons-src-dir (string-append out "/data/images/unix")) ;; 正しいソースパスを指定
+                               (mozc-icons-src-dir (string-append out "/data/images/unix")) ;; ソースディレクトリのパスを適切に設定してください
                                (icon-sizes '("32x32" "48x48" "128x128")))
                           
                           ;; アイコンサイズごとのディレクトリにアイコンファイルをコピー
@@ -124,26 +124,19 @@
                                       (let* ((size-dir (string-append icons-dir "/" size "/apps")))
                                         (mkdir-p size-dir)
                                         ;; 各アイコンに対する操作
-                                        (let ((icons '("ime_product_icon_opensource-32.png"
-                                                       "ui-tool.png"
-                                                       "ui-properties.png"
-                                                       "ui-dictionary.png"
-                                                       "ui-direct.png"
-                                                       "ui-hiragana.png"
-                                                       "ui-katakana_half.png"
-                                                       "ui-katakana_full.png"
-                                                       "ui-alpha_half.png"
-                                                       "ui-alpha_full.png")))
-                                          (for-each (lambda (icon)
-                                                      (let* ((source (string-append mozc-icons-src-dir "/" icon))
-                                                             ;; fcitx-mozcで始まるファイル名
-                                                             (fcitx-icon-name (string-append "fcitx-mozc" "-" (file-name-sans-extension icon) ".png"))
-                                                             (fcitx-icon-target (string-append size-dir "/" fcitx-icon-name))
-                                                             ;; org.fcitx.Fcitx5.で始まるファイル名
-                                                             (org-icon-name (string-append "org.fcitx.Fcitx5." fcitx-icon-name))
-                                                             (org-icon-target (string-append size-dir "/" org-icon-name)))
-                                                        (copy-file source fcitx-icon-target)
-                                                        (copy-file source org-icon-target)))
+                                        (let ((icons '(
+                                                       ;; ベース名から直接必要な名前を生成
+                                                       ("ime_product_icon_opensource-32.png" "fcitx-mozc.png" "org.fcitx.Fcitx5.fcitx-mozc.png")
+                                                       ("ui-tool.png" "fcitx-mozc-tool.png" "org.fcitx.Fcitx5.fcitx-mozc-tool.png")
+                                                       ("ui-properties.png" "fcitx-mozc-properties.png" "org.fcitx.Fcitx5.fcitx-mozc-properties.png")
+                                                       ;; 他のアイコンも同様に追加
+                                                       )))
+                                          (for-each (lambda (icon-info)
+                                                      (let* ((source-file (string-append mozc-icons-src-dir "/" (car icon-info)))
+                                                             (fcitx-target-file (string-append size-dir "/" (cadr icon-info)))
+                                                             (org-fcitx-target-file (string-append size-dir "/" (caddr icon-info))))
+                                                        (copy-file source-file fcitx-target-file)
+                                                        (copy-file source-file org-fcitx-target-file)))
                                                     icons))))
                                     icon-sizes)
                           #t)))
