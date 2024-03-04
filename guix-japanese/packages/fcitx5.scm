@@ -198,6 +198,25 @@
             (base32
 	     "0c2din7gr2bskh0wn33i4q1jpvccsjq94xad5714i8frkz6gs3my"))))
   (build-system cmake-build-system)
+  (arguments
+   `(#:phases
+     (modify-phases %standard-phases
+                    (add-before 'configure 'set-environment-variables
+                                (lambda* (#:key inputs outputs #:allow-other-keys)
+                                  ;; 依存関係のパスを定義
+                                  (let ((ecm-bin (string-append (assoc-ref inputs "ecm") "/bin"))
+                                        (pkg-config (string-append (assoc-ref inputs "pkg-config") "/bin")))
+                                    ;; 環境変数PATHにecmのbinディレクトリを追加
+                                    (setenv "PATH" (string-append ecm-bin ":" pkg-config ":" (getenv "PATH")))
+                                    ;; PKG_CONFIG_PATHの設定
+                                    (setenv "PKG_CONFIG_PATH"
+                                            (string-join
+                                             (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
+                                                   (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
+                                                   (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                                   (getenv "PKG_CONFIG_PATH"))
+                                             ":"))
+                                    #t))))))
   (propagated-inputs
    (list libskk))
   (native-inputs
