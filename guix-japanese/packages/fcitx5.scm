@@ -21,6 +21,7 @@
   #:use-module  (gnu packages gnome)
   #:use-module  (gnu packages bash)
   #:use-module  (gnu packages gtk)
+  #:use-module  (gnu packages kde-frameworks)
   #:use-module  (gnu packages pkg-config)
   #:use-module  (gnu packages protobuf)
   #:use-module  (gnu packages java)
@@ -198,31 +199,28 @@
             (base32
 	     "0c2din7gr2bskh0wn33i4q1jpvccsjq94xad5714i8frkz6gs3my"))))
   (build-system cmake-build-system)
-(arguments
- `(#:phases
-   (modify-phases %standard-phases
-                  (add-before 'configure 'set-environment-variables
-                              (lambda* (#:key inputs outputs #:allow-other-keys)
-                                ;; ECMのインストールプレフィックスを取得
-                                (let ((ecm-prefix (assoc-ref inputs "ecm")))
-                                  ;; 環境変数PATHにpkg-configのbinディレクトリを追加
-                                  (setenv "PATH" (string-append (string-append (assoc-ref inputs "pkg-config") "/bin") ":" (getenv "PATH")))
-                                  ;; CMAKE_PREFIX_PATHにECMのインストールプレフィックスを設定
-                                  (setenv "CMAKE_PREFIX_PATH" ecm-prefix)
-                                  ;; PKG_CONFIG_PATHの設定
-                                  (setenv "PKG_CONFIG_PATH"
-                                          (string-join
-                                           (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
-                                                 (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
-                                                 (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
-                                                 (getenv "PKG_CONFIG_PATH"))
-                                           ":"))
-                                  #t))))))
-
+  (arguments
+   `(#:phases
+     (modify-phases %standard-phases
+                    (add-before 'configure 'set-environment-variables
+                                (lambda* (#:key inputs outputs #:allow-other-keys)
+                                  ;; 依存関係のパスを定義
+                                  (let ((ecm-dir (string-append (assoc-ref inputs "ecm") "/bin/")))
+                                    ;; CMAKE_PREFIX_PATHにECMのディレクトリを追加
+                                    (setenv "CMAKE_PREFIX_PATH" ecm-dir)
+                                    ;; PKG_CONFIG_PATHの設定（必要に応じて）
+                                    (setenv "PKG_CONFIG_PATH"
+                                            (string-join
+                                             (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
+                                                   (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
+                                                   (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                                   (getenv "PKG_CONFIG_PATH"))
+                                             ":"))
+                                    #t))))))
   (propagated-inputs
    (list libskk))
   (native-inputs
-   `(("ecm" ,ecm)
+   `(("ecm" ,extra-cmake-modules)
      ("libgee" ,libgee)
      ("libskk" ,libskk)
      ("fcitx5" ,fcitx5)
