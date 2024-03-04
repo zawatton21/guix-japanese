@@ -205,7 +205,7 @@
                     (add-before 'configure 'set-environment-variables
                                 (lambda* (#:key inputs outputs #:allow-other-keys)
                                   ;; 依存関係のパスを定義
-                                  (let ((ecm-dir (string-append (assoc-ref inputs "ecm") "/bin/")))
+                                  (let ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake")))
                                     ;; CMAKE_PREFIX_PATHにECMのディレクトリを追加
                                     (setenv "CMAKE_PREFIX_PATH" ecm-dir)
                                     ;; PKG_CONFIG_PATHの設定（必要に応じて）
