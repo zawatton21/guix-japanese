@@ -62,8 +62,7 @@
                       #t)))
            (add-after 'build 'compile-po-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
-                        (let* ((po-dir "unix/fcitx5/po/")
-                               (in-dir "unix/fcitx5/"))
+                        (let* ((po-dir "unix/fcitx5/po/"))
 
                           (for-each (lambda (lang)
                                       (let* ((po-file (string-append po-dir lang ".po"))
@@ -77,8 +76,9 @@
                       (let* ((out (assoc-ref outputs "out"))
                              (lib-dir (string-append out "/lib/fcitx5"))
                              (share-dir (string-append out "/share"))
+                             (in-dir "unix/fcitx5/")
                              (locale-dir (string-append share-dir "/locale"))
-                             (metainfo-dir (string-append share-dir "/metainfo"))
+                             (metainfo-dir (string-append share-dir "/metainfo/"))
                              (addon-dir (string-append share-dir "/fcitx5/addon"))
                              (inputmethod-dir (string-append share-dir "/fcitx5/inputmethod")))
                         ;; モジュールファイルのインストール
@@ -103,7 +103,7 @@
 
                         ;; .in ファイルから .xml ファイルを生成
                         (let ((in-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in"))
-                              (out-file (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
+                              (out-file (string-append metainfo-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
                           (mkdir-p (dirname out-file))
                           (call-with-output-file out-file
                             (lambda (port)
