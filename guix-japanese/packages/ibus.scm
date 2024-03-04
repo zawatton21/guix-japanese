@@ -106,6 +106,7 @@
                         #t)))))))
     (inputs
      `(("mozc-server" ,mozc-server)
+       ("ibus" ,ibus)
        ,@(package-inputs mozc-common)))))
 
 (define-public ibus-skk

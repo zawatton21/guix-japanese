@@ -63,49 +63,40 @@
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (let* ((out (assoc-ref outputs "out"))
-                             (lib-dir (string-append out "/lib/ibus-mozc"))
-                	     (mozc-dir (string-append out "/lib/mozc"))
-                             (mozc-server-path (assoc-ref inputs "mozc-server"))
-                             (share-dir (string-append out "/share/ibus/component"))
-                             (images-dir (string-append out "/share/ibus-mozc"))
-                             (applications-dir (string-append out "/share/applications"))
-                             (debian-patches-dir (assoc-ref inputs "mozc-debian-patches"))
-                             (desktop-files-source-dir (string-append debian-patches-dir "/debian"))
-                             (icon-path (string-append out "/share/ibus-mozc/product_icon.png"))
-                	     (version "2.28.4715.102"))
-                        (unless mozc-server-path
-                          (error "mozc-server input not found"))
-                        (define tool-exec-apth (string-append mozc-server-path "/lib/mozc/mozc_tool"))
-                        ;; `out_linux/`ディレクトリから必要なファイルをインストールディレクトリにコピー
+                             (lib-dir (string-append out "/lib/fcitx5"))
+                             (share-dir (string-append out "/share"))
+                             (locale-dir (string-append share-dir "/locale"))
+                             (metainfo-dir (string-append share-dir "/metainfo"))
+                             (addon-dir (string-append share-dir "/fcitx5/addon"))
+                             (inputmethod-dir (string-append share-dir "/fcitx5/inputmethod")))
+                        ;; モジュールファイルのインストール
                         (mkdir-p lib-dir)
-                        (mkdir-p mozc-dir)
-                        (mkdir-p share-dir)
-                        (mkdir-p images-dir)
-
-                        ;; 実行ファイルやリソースファイルのコピー
-                        (copy-recursively "out_linux/Release/ibus_mozc" (string-append lib-dir "/ibus-engine-mozc"))
-
-                        (substitute* (string-append "out_linux/Release/gen/unix/ibus/mozc.xml")
-                                     (("/usr/lib/ibus-mozc/ibus-engine-mozc --ibus") 
-                                      (string-append out "/lib/ibus-mozc/ibus-engine-mozc --ibus"))
-                                     (("/usr/lib/ibus-mozc/ibus-engine-mozc --xml")
-                                      (string-append out "/lib/ibus-mozc/ibus-engine-mozc --xml"))
-                                     (("0.0.0.0") version))
+                        (copy-file "out_linux/Release/fcitx5-mozc.so" (string-append lib-dir "/libmozc.so"))
                         
-                        (copy-recursively "out_linux/Release/gen/unix/ibus/mozc.xml" (string-append share-dir "/mozc.xml"))
+                        ;; 設定ファイルのインストール
+                        (mkdir-p addon-dir)
+                        (copy-file "out_linux/Release/gen/unix/fcitx5/mozc-addon.conf" (string-append addon-dir "/mozc.conf"))
                         
-                        (mkdir-p applications-dir)
+                        (mkdir-p inputmethod-dir)
+                        (copy-file "out_linux/Release/gen/unix/fcitx5/mozc.conf" (string-append inputmethod-dir "/mozc.conf"))
+                        
+                        ;; 翻訳ファイルのインストール
+                        (let ((po-files '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW")))
+                          (for-each (lambda (lang)
+                                      (let ((mo-file-path (string-append "out_linux/Release/gen/unix/fcitx5/po/" lang ".mo"))
+                                            (target-dir (string-append locale-dir "/" lang "/LC_MESSAGES")))
+                                        (mkdir-p target-dir)
+                                        (copy-file mo-file-path (string-append target-dir "/fcitx5-mozc.mo"))))
+                                    po-files))
 
-                        ;; ibus-setup-mozc-jp.desktop の処理（Execのパスのみ変更）
-                        (let ((source-file (string-append desktop-files-source-dir "/ibus-setup-mozc-jp.desktop"))
-                              (destination-file (string-append applications-dir "/ibus-setup-mozc-jp.desktop")))
-                          (copy-file source-file destination-file)
-                          (substitute* destination-file
-                                       (("Exec=/usr/lib/mozc/mozc_tool --mode=config_dialog" _)
-                                        (string-append "Exec=" tool-exec-apth " --mode=config_dialog"))))
+                        ;; メタ情報のインストール
+                        (mkdir-p metainfo-dir)
+                        (copy-file "out_linux/Release/gen/unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
+
                         #t)))))))
     (inputs
      `(("mozc-server" ,mozc-server)
+       ("fcitx5" ,fcitx5)
        ,@(package-inputs mozc-common)))))
 
 (define-public fcitx5-skk
