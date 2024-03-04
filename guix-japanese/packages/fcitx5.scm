@@ -75,15 +75,15 @@
                         
                         ;; 設定ファイルのインストール
                         (mkdir-p addon-dir)
-                        (copy-file "out_linux/Release/gen/unix/fcitx5/mozc-addon.conf" (string-append addon-dir "/mozc.conf"))
+                        (copy-file "src/unix/fcitx5/mozc-addon.conf" (string-append addon-dir "/mozc.conf"))
                         
                         (mkdir-p inputmethod-dir)
-                        (copy-file "out_linux/Release/gen/unix/fcitx5/mozc.conf" (string-append inputmethod-dir "/mozc.conf"))
+                        (copy-file "src/unix/fcitx5/mozc.conf" (string-append inputmethod-dir "/mozc.conf"))
                         
                         ;; 翻訳ファイルのインストール
                         (let ((po-files '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW")))
                           (for-each (lambda (lang)
-                                      (let ((mo-file-path (string-append "out_linux/Release/gen/unix/fcitx5/po/" lang ".mo"))
+                                      (let ((mo-file-path (string-append "src/unix/fcitx5/po/" lang ".mo"))
                                             (target-dir (string-append locale-dir "/" lang "/LC_MESSAGES")))
                                         (mkdir-p target-dir)
                                         (copy-file mo-file-path (string-append target-dir "/fcitx5-mozc.mo"))))
@@ -91,7 +91,7 @@
 
                         ;; メタ情報のインストール
                         (mkdir-p metainfo-dir)
-                        (copy-file "out_linux/Release/gen/unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
+                        (copy-file "src/unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
 
                         #t)))))))
     (inputs
