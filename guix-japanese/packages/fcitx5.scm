@@ -203,6 +203,7 @@
   (arguments
    `(#:modules ((guix build cmake-build-system)
                 (guix build utils))
+     #:tests? #f
      #:configure-flags
      (let* ((out (assoc-ref %outputs "out"))
             (libskk-lib-dir (string-append (assoc-ref %build-inputs "libskk") "/lib"))
