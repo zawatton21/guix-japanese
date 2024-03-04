@@ -158,7 +158,6 @@
       ("findutils" ,findutils)
       ("gtk+" ,gtk+-2) ;; Wayland でなく X11 を使用している時は Gtk2 でないと変換候補が表示されない
       ("grep" ,grep)
-      ("sed" ,sed)
       ("which" ,which)
       ("bash", bash)
       ("fcitx", fcitx)

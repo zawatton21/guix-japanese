@@ -60,7 +60,7 @@
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
                       (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/fcitx5/fcitx5.gyp:fcitx5-mozc")
                       #t)))
-           (add-after 'build 'compile-files
+           (add-after 'build 'compile-po-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
                         (let* ((po-dir "unix/fcitx5/po/")
                                (in-dir "unix/fcitx5/"))
@@ -71,13 +71,6 @@
                                         (mkdir-p (dirname mo-file))
                                         (invoke "msgfmt" po-file "-o" mo-file)))
                                     '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW"))
-
-                          ;; .in ファイルから .xml ファイルを生成
-                          (let ((in-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in"))
-                                (out-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
-                            (invoke "sed"
-                                    "-e" "s|@VERSION@|2.28.4715.102|g" ;; ここで必要な置換を行う
-                                    in-file ">" out-file))
                           #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
@@ -108,14 +101,17 @@
                                         (copy-file mo-file-path (string-append target-dir "/fcitx5-mozc.mo"))))
                                     po-files))
 
-                        ;; メタ情報のインストール
-                        (mkdir-p metainfo-dir)
-                        (copy-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
-
+                        ;; .in ファイルから .xml ファイルを生成
+                        (let ((in-file (string-append in-dir "org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in"))
+                              (out-file (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml")))
+                          (mkdir-p (dirname out-file))
+                          (call-with-output-file out-file
+                            (lambda (port)
+                              (invoke "sed"
+                                      "-e" "s|@VERSION@|2.28.4715.102|g"
+                                      in-file)
+                              (dump-port (current-output-port) port))))
                         #t)))))))
-    (native-inputs
-     `(("sed" ,sed)
-       ,@(package-native-inputs mozc-server)))
     (inputs
      `(("mozc-server" ,mozc-server)
        ("fcitx5" ,fcitx5)
