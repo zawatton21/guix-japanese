@@ -248,19 +248,13 @@
                                     ;; PKG_CONFIG_PATHを設定
                                     (setenv "PKG_CONFIG_PATH" pkg-config-path)
                                     #t)))
-                    (add-after 'install 'fix-dictionary-path
+                    (add-after 'unpack 'fix-dictionary-path
                                (lambda* (#:key outputs #:allow-other-keys)
-                                 (let* ((out (assoc-ref outputs "out"))
-                                        (home (getenv "HOME"))
-                                        (dictionary-path (string-append out "/share/fcitx5/skk/dictionary_list"))
-                                        (new-path (string-append home "/.guix-profile/share/skk/SKK-JISYO.L")))
-                                   (if (file-exists? dictionary-path)
-                                       (begin
-                                         (substitute* dictionary-path
-                                                      ((("/usr/share/skk/SKK-JISYO.L") new-path)))
-                                         (display "Dictionary path updated.\n"))
-                                       (display "Dictionary path does not exist; no changes made.\n"))
-                                   #t)))
+                                 (let* ((src (assoc-ref %build-inputs "src")))
+                                   (substitute* (string-append src "/data/dictionary_list")
+                                                (("type=file,file=/usr/share/skk/SKK-JISYO.L,mode=readonly")
+                                                 "type=file,file=%s/share/skk/SKK-JISYO.L,mode=readonly\".printf(Environment.get_user_config_dir())")))
+                                 #t)))
                     )))
   (propagated-inputs
    (list libskk))
