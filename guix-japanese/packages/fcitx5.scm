@@ -83,7 +83,7 @@
                              (inputmethod-dir (string-append share-dir "/fcitx5/inputmethod")))
                         ;; モジュールファイルのインストール
                         (mkdir-p lib-dir)
-                        (copy-file "out_linux/Release/fcitx5-mozc.so" (string-append lib-dir "/libmozc.so"))
+                        (copy-file "out_linux/Release/fcitx5-mozc.so" (string-append lib-dir "/fcitx5-mozc.so"))
                         
                         ;; 設定ファイルのインストール
                         (mkdir-p addon-dir)
