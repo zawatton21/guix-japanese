@@ -62,8 +62,12 @@
                       #t)))
            (add-after 'build 'compile-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
-                        (let* ((po-dir "unix/fcitx5/po/")
+                        (let* ((out (assoc-ref outputs "out"))
+                               (share-dir (string-append out "/share"))
+                               (metainfo-dir (string-append share-dir "/metainfo"))
+                               (po-dir "unix/fcitx5/po/")
                                (mo-dir (string-append (assoc-ref outputs "out") "/share/locale")))
+
                           (for-each (lambda (lang)
                                       (let* ((po-file (string-append po-dir lang ".po"))
                                              (mo-file (string-append mo-dir "/" lang "/LC_MESSAGES/fcitx5-mozc.mo")))
