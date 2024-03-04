@@ -206,7 +206,7 @@
                                 (lambda* (#:key inputs outputs #:allow-other-keys)
                                   ;; ECMのcmakeモジュールが存在するディレクトリとLibSKKのpkg-configファイルが存在するディレクトリを定義
                                   (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
-                                         (libskk-pkg-config-dir (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")))
+                                         (libskk-pkg-config-dir (string-append (assoc-ref inputs "libskk") "/lib")))
                                     ;; CMAKE_PREFIX_PATHにECMのディレクトリを追加
                                     (setenv "CMAKE_PREFIX_PATH" ecm-dir)
                                     ;; PKG_CONFIG_PATHにLibSKKのpkg-configディレクトリを追加
