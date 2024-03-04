@@ -60,6 +60,17 @@
                       (invoke "python3" "build_mozc.py" "gyp" (string-append "--gypdir=" gyp-bin) (string-append "--server_dir=" mozc-server-dir) "--target_platform=Linux" "--verbose")
                       (invoke "python3" "build_mozc.py" "build" "-c" "Release" "unix/fcitx5/fcitx5.gyp:fcitx5-mozc")
                       #t)))
+           (add-after 'build 'compile-po-files
+                      (lambda* (#:key inputs outputs #:allow-other-keys)
+                        (let* ((po-dir "unix/fcitx5/po/")
+                               (mo-dir (string-append (assoc-ref outputs "out") "/share/locale")))
+                          (for-each (lambda (lang)
+                                      (let* ((po-file (string-append po-dir lang ".po"))
+                                             (mo-file (string-append mo-dir "/" lang "/LC_MESSAGES/fcitx5-mozc.mo")))
+                                        (mkdir-p (dirname mo-file))
+                                        (invoke "msgfmt" po-file "-o" mo-file)))
+                                    '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW"))
+                          #t)))
            (replace 'install
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       (let* ((out (assoc-ref outputs "out"))
@@ -83,7 +94,7 @@
                         ;; 翻訳ファイルのインストール
                         (let ((po-files '("ca" "da" "de" "he" "ja" "ko" "ru" "zh_CN" "zh_TW")))
                           (for-each (lambda (lang)
-                                      (let ((mo-file-path (string-append "unix/fcitx5/po/" lang ".po"))
+                                      (let ((mo-file-path (string-append "unix/fcitx5/po/" lang ".mo"))
                                             (target-dir (string-append locale-dir "/" lang "/LC_MESSAGES")))
                                         (mkdir-p target-dir)
                                         (copy-file mo-file-path (string-append target-dir "/fcitx5-mozc.mo"))))
