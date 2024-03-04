@@ -204,14 +204,15 @@
      (modify-phases %standard-phases
                     (add-before 'configure 'set-environment-variables
                                 (lambda* (#:key inputs outputs #:allow-other-keys)
-                                  ;; 依存関係のパスを定義
-                                  (let ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake")))
+                                  ;; ECMのcmakeモジュールが存在するディレクトリとLibSKKのpkg-configファイルが存在するディレクトリを定義
+                                  (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
+                                         (libskk-pkg-config-dir (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")))
                                     ;; CMAKE_PREFIX_PATHにECMのディレクトリを追加
                                     (setenv "CMAKE_PREFIX_PATH" ecm-dir)
-                                    ;; PKG_CONFIG_PATHの設定（必要に応じて）
+                                    ;; PKG_CONFIG_PATHにLibSKKのpkg-configディレクトリを追加
                                     (setenv "PKG_CONFIG_PATH"
                                             (string-join
-                                             (list (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
+                                             (list libskk-pkg-config-dir
                                                    (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                    (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
                                                    (getenv "PKG_CONFIG_PATH"))
