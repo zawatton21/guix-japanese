@@ -201,7 +201,8 @@
   (propagated-inputs
    (list libskk))
   (native-inputs
-   `(("libgee" ,libgee)
+   `(("ecm" ,ecm)
+     ("libgee" ,libgee)
      ("libskk" ,libskk)
      ("fcitx5" ,fcitx5)
      ("fcitx5-qt" ,fcitx5-qt)
