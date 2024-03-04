@@ -211,6 +211,7 @@
 )
        (list (string-append "-DCMAKE_INSTALL_PREFIX=" out)
              "-DBUILD_SHARED_LIBS=ON"
+             "-DQT_MAJOR_VERSION=5"
              (string-append "-DLIBSKK_LIBRARIES=" libskk-lib-dir "/libskk.so")
              (string-append "-DLIBSKK_INCLUDE_DIR=" libskk-include-dir)
              (string-append "-DOPENGL_INCLUDE_DIR=" mesa-include-dir)
@@ -247,7 +248,7 @@
      ("libskk" ,libskk)
      ("fcitx5" ,fcitx5)
      ("fcitx5-qt" ,fcitx5-qt)
-     ("qtbase" ,qtbase)
+     ("qtbase" ,qtbase-5)
      ("mesa" ,mesa)
      ("libglvnd" ,libglvnd)
      ("automake" ,automake)
