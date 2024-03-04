@@ -215,6 +215,7 @@
                                              (list libskk-pkg-config-dir
                                                    (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                    (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
+                                                   (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
                                                    (getenv "PKG_CONFIG_PATH"))
                                              ":"))
                                     #t))))))
