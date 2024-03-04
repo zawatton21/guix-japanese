@@ -117,7 +117,7 @@
                                (lib-dir (string-append out "/lib/fcitx5"))
                                (share-dir (string-append out "/share"))
                                (icons-dir (string-append share-dir "/icons/hicolor"))
-                               (mozc-icons-src-dir "usr/share/icons/mozc")
+                               (mozc-icons-src-dir "data/images/unix")
                                (icon-sizes '("32x32" "48x48" "128x128")))
                           
                           ;; アイコンファイルのインストール
