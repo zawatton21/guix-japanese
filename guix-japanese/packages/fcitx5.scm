@@ -114,30 +114,68 @@
            (add-after 'install 'install-icon-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
                         (let* ((out (assoc-ref outputs "out"))
+                               (lib-dir (string-append out "/lib/fcitx5"))
                                (share-dir (string-append out "/share"))
                                (icons-dir (string-append share-dir "/icons/hicolor"))
-                               (mozc-icons-src-dir (string-append out "/data/images/unix")) ;; ソースディレクトリのパスを適切に設定してください
+                               (mozc-icons-src-dir "data/images/unix")
                                (icon-sizes '("32x32" "48x48" "128x128")))
                           
-                          ;; アイコンサイズごとのディレクトリにアイコンファイルをコピー
+                          ;; アイコンファイルのインストール
+                          ;; アイコンファイルをソースディレクトリから適切なアイコンディレクトリにコピー
                           (for-each (lambda (size)
                                       (let* ((size-dir (string-append icons-dir "/" size "/apps")))
                                         (mkdir-p size-dir)
-                                        ;; 各アイコンに対する操作
-                                        (let ((icons '(
-                                                       ;; ベース名から直接必要な名前を生成
-                                                       ("ime_product_icon_opensource-32.png" "fcitx-mozc.png" "org.fcitx.Fcitx5.fcitx-mozc.png")
-                                                       ("ui-tool.png" "fcitx-mozc-tool.png" "org.fcitx.Fcitx5.fcitx-mozc-tool.png")
-                                                       ("ui-properties.png" "fcitx-mozc-properties.png" "org.fcitx.Fcitx5.fcitx-mozc-properties.png")
-                                                       ;; 他のアイコンも同様に追加
-                                                       )))
-                                          (for-each (lambda (icon-info)
-                                                      (let* ((source-file (string-append mozc-icons-src-dir "/" (car icon-info)))
-                                                             (fcitx-target-file (string-append size-dir "/" (cadr icon-info)))
-                                                             (org-fcitx-target-file (string-append size-dir "/" (caddr icon-info))))
-                                                        (copy-file source-file fcitx-target-file)
-                                                        (copy-file source-file org-fcitx-target-file)))
-                                                    icons))))
+                                        
+                                        (copy-file (string-append mozc-icons-src-dir "/ime_product_icon_opensource-32.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ime_product_icon_opensource-32.png")
+                                                   (string-append size-dir "/fcitx-mozc.png"))
+                                        
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-tool.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-tool.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-tool.png")
+                                                   (string-append size-dir "/fcitx-mozc-tool.png"))
+                                        
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-properties.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-tool.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-properties.png")
+                                                   (string-append size-dir "/fcitx-mozc-tool.png"))
+                                        
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-dictionary.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-dictionary.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-dictionary.png")
+                                                   (string-append size-dir "/fcitx-mozc-dictionary.png"))
+                                        
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-direct.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-direct.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-direct.png")
+                                                   (string-append size-dir "/fcitx-mozc-direct.png"))
+                                        
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-hiragana.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-hiragana.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-hiragana.png")
+                                                   (string-append size-dir "/fcitx-mozc-hiragana.png"))
+
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-katakana_half.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-katakana_half.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-katakana_half.png")
+                                                   (string-append size-dir "/fcitx-mozc-katakana_half.png"))
+
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-katakana_full.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-katakana_full.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-katakana_full.png")
+                                                   (string-append size-dir "/fcitx-mozc-katakana_full.png"))
+
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-alpha_half.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-alpha_half.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-alpha_half.png")
+                                                   (string-append size-dir "/fcitx-mozc-alpha_half.png"))
+
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-alpha_full.png")
+                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-alpha_full.png"))
+                                        (copy-file (string-append mozc-icons-src-dir "/ui-alpha_full.png")
+                                                   (string-append size-dir "/fcitx-mozc-alpha_full.png"))
+                                        ))
                                     icon-sizes)
                           #t)))
            ))))
