@@ -202,22 +202,27 @@
   (arguments
    `(#:phases
      (modify-phases %standard-phases
-                    (add-before 'configure 'set-environment-variables
+                    (add-before 'configure 'set-cmake-flags
                                 (lambda* (#:key inputs outputs #:allow-other-keys)
-                                  ;; ECMのcmakeモジュールが存在するディレクトリとLibSKKのpkg-configファイルが存在するディレクトリを定義
-                                  (let* ((ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake"))
-                                         (libskk-pkg-config-dir (string-append (assoc-ref inputs "libskk") "/lib")))
-                                    ;; CMAKE_PREFIX_PATHにECMのディレクトリを追加
+                                  (let* ((libskk-lib-dir (string-append (assoc-ref inputs "libskk") "/lib"))
+                                         (libskk-include-dir (string-append (assoc-ref inputs "libskk") "/include/libskk"))
+                                         (ecm-dir (string-append (assoc-ref inputs "ecm") "/share/ECM/cmake")))
                                     (setenv "CMAKE_PREFIX_PATH" ecm-dir)
+                                    ;; LibSKKのライブラリとインクルードディレクトリを設定
+                                    (setenv "LIBSKK_LIBRARIES" (string-append libskk-lib-dir "/libskk.so"))
+                                    (setenv "LIBSKK_INCLUDE_DIR" libskk-include-dir)
                                     ;; PKG_CONFIG_PATHにLibSKKのpkg-configディレクトリを追加
                                     (setenv "PKG_CONFIG_PATH"
                                             (string-join
-                                             (list libskk-pkg-config-dir
+                                             (list (string-append libskk-lib-dir "/pkgconfig")
                                                    (string-append (assoc-ref inputs "fcitx5") "/lib/pkgconfig")
                                                    (string-append (assoc-ref inputs "qtbase") "/lib/pkgconfig")
-                                                   (string-append (assoc-ref inputs "libskk") "/lib/pkgconfig")
                                                    (getenv "PKG_CONFIG_PATH"))
                                              ":"))
+                                    ;; CMakeの追加のフラグを設定
+                                    (setenv "CMAKE_FLAGS"
+                                            (string-append "-DLIBSKK_LIBRARIES=" (getenv "LIBSKK_LIBRARIES")
+                                                           " -DLIBSKK_INCLUDE_DIR=" (getenv "LIBSKK_INCLUDE_DIR")))
                                     #t))))))
   (propagated-inputs
    (list libskk))
