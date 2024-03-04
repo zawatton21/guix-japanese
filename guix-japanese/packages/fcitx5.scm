@@ -121,44 +121,28 @@
                                (icon-sizes '("32x32" "48x48" "128x128")))
                           
                           ;; アイコンファイルのインストール
-                          ;; アイコンファイルをソースディレクトリから適切なアイコンディレクトリにコピー
                           (for-each (lambda (size)
                                       (let* ((size-dir (string-append icons-dir "/" size "/apps")))
                                         (mkdir-p size-dir)
-
-                                        (copy-file (string-append mozc-icons-src-dir "/ime_product_icon_opensource-32.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc.png"))
-
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-tool.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-tool.png"))
-                                        
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-properties.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-tool.png"))
-                                        
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-dictionary.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-dictionary.png"))
-                                        
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-direct.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-direct.png"))
-                                        
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-hiragana.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-hiragana.png"))
-
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-katakana_half.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-katakana_half.png"))
-
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-katakana_full.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-katakana_full.png"))
-
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-alpha_half.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-alpha_half.png"))
-
-                                        (copy-file (string-append mozc-icons-src-dir "/ui-alpha_full.png")
-                                                   (string-append size-dir "/org.fcitx.Fcitx5.fcitx-mozc-alpha_full.png"))
-                                        ))
-                                    icon-sizes)
-                          #t)))
-
+                                        ;; 各アイコンファイルに対して2種類のファイル名でコピー
+                                        (for-each (lambda (icon-info)
+                                                    (let ((source (string-append mozc-icons-src-dir "/" (car icon-info)))
+                                                          (target-org (cdr icon-info))
+                                                          (target-fcitx (string-replace target-org "org.fcitx.Fcitx5." "")))
+                                                      (copy-file source (string-append size-dir "/" target-org))
+                                                      (copy-file source (string-append size-dir "/" target-fcitx))))
+                                                  '(("ime_product_icon_opensource-32.png" "org.fcitx.Fcitx5.fcitx-mozc.png")
+                                                    ("ui-tool.png" "org.fcitx.Fcitx5.fcitx-mozc-tool.png")
+                                                    ("ui-properties.png" "org.fcitx.Fcitx5.fcitx-mozc-tool.png")
+                                                    ("ui-dictionary.png" "org.fcitx.Fcitx5.fcitx-mozc-dictionary.png")
+                                                    ("ui-direct.png" "org.fcitx.Fcitx5.fcitx-mozc-direct.png")
+                                                    ("ui-hiragana.png" "org.fcitx.Fcitx5.fcitx-mozc-hiragana.png")
+                                                    ("ui-katakana_half.png" "org.fcitx.Fcitx5.fcitx-mozc-katakana_half.png")
+                                                    ("ui-katakana_full.png" "org.fcitx.Fcitx5.fcitx-mozc-katakana_full.png")
+                                                    ("ui-alpha_half.png" "org.fcitx.Fcitx5.fcitx-mozc-alpha_half.png")
+                                                    ("ui-alpha_full.png" "org.fcitx.Fcitx5.fcitx-mozc-alpha_full.png"))))
+                                      icon-sizes))
+                                    #t)))
            ))))
     (inputs
      `(("mozc-server" ,mozc-server)
