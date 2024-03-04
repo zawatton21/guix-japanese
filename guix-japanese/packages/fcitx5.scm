@@ -91,7 +91,7 @@
 
                         ;; メタ情報のインストール
                         (mkdir-p metainfo-dir)
-                        (copy-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
+                        (copy-file "unix/fcitx5/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml.in" (string-append metainfo-dir "/org.fcitx.Fcitx5.Addon.Mozc.metainfo.xml"))
 
                         #t)))))))
     (inputs
