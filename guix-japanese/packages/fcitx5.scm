@@ -114,17 +114,16 @@
            (add-after 'install 'install-icon-files
                       (lambda* (#:key inputs outputs #:allow-other-keys)
                         (let* ((out (assoc-ref outputs "out"))
-                               (lib-dir (string-append out "/lib/fcitx5"))
                                (share-dir (string-append out "/share"))
                                (icons-dir (string-append share-dir "/icons/hicolor"))
-                               (mozc-icons-src-dir "data/images/unix")
+                               (mozc-icons-src-dir (string-append out "/data/images/unix")) ;; 正しいソースパスを指定
                                (icon-sizes '("32x32" "48x48" "128x128")))
-      
-                          ;; アイコンファイルのインストール
+                          
+                          ;; アイコンサイズごとのディレクトリにアイコンファイルをコピー
                           (for-each (lambda (size)
                                       (let* ((size-dir (string-append icons-dir "/" size "/apps")))
                                         (mkdir-p size-dir)
-                                        ;; アイコンファイルのリスト
+                                        ;; 各アイコンに対する操作
                                         (let ((icons '("ime_product_icon_opensource-32.png"
                                                        "ui-tool.png"
                                                        "ui-properties.png"
@@ -137,17 +136,17 @@
                                                        "ui-alpha_full.png")))
                                           (for-each (lambda (icon)
                                                       (let* ((source (string-append mozc-icons-src-dir "/" icon))
-                                                             (base-name (basename icon))
-                                                             (fcitx-icon-name (string-append "fcitx-mozc" (substring base-name (string-rindex base-name #\-))))
-                                                             (org-icon-name (string-append "org.fcitx.Fcitx5." fcitx-icon-name))
+                                                             ;; fcitx-mozcで始まるファイル名
+                                                             (fcitx-icon-name (string-append "fcitx-mozc" "-" (file-name-sans-extension icon) ".png"))
                                                              (fcitx-icon-target (string-append size-dir "/" fcitx-icon-name))
+                                                             ;; org.fcitx.Fcitx5.で始まるファイル名
+                                                             (org-icon-name (string-append "org.fcitx.Fcitx5." fcitx-icon-name))
                                                              (org-icon-target (string-append size-dir "/" org-icon-name)))
                                                         (copy-file source fcitx-icon-target)
                                                         (copy-file source org-icon-target)))
-                                                    icons)))
-                                      icon-sizes))
-                                    #t)))
-
+                                                    icons))))
+                                    icon-sizes)
+                          #t)))
            ))))
     (inputs
      `(("mozc-server" ,mozc-server)
