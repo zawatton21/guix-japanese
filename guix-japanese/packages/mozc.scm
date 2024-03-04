@@ -31,6 +31,7 @@
   #:use-module  (gnu packages freedesktop)
   #:use-module  (gnu packages dictionaries)
   #:use-module  (gnu packages ibus)
+  #:use-module  (guix-japanese packages)
   #:use-module  (guix-japanese packages google)
   #:use-module  (guix licenses)
   #:use-module  (ice-9 rdelim)  ; read-string 関数のため
