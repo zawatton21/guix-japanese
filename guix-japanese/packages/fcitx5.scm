@@ -219,10 +219,10 @@
      #:phases
      (modify-phases %standard-phases
                     (add-after 'unpack 'modify-cmakelists
-                               (lambda* (#:key outputs #:allow-other-keys)
+                               (lambda* (#:key inputs outputs #:allow-other-keys)
                                  (substitute* "CMakeLists.txt"
-                                              (("set\\(SKK_DEFAULT_PATH \"/usr/share/skk/SKK-JISYO.L\" CACHE STRING \"Default path of SKK\"\\)")
-                                                "set(SKK_DEFAULT_PATH \"$ENV{HOME}/.guix-profile/share/skk/SKK-JISYO.L\" CACHE STRING \"Default path of SKK\")"))
+                                              (("/usr/share/skk/SKK-JISYO.L")
+                                                (string-append (assoc-ref inputs "skk-jisyo" "/share/skk/SKK-JISYO.L"))))
                                  ))
                     (add-before 'configure 'modify-cmakelists
                                 (lambda _ 
