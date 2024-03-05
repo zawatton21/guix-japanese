@@ -222,7 +222,7 @@
                                (lambda* (#:key inputs outputs #:allow-other-keys)
                                  (substitute* "CMakeLists.txt"
                                               (("/usr/share/skk/SKK-JISYO.L")
-                                                (string-append (assoc-ref inputs "skk-jisyo" "/share/skk/SKK-JISYO.L"))))
+                                                (string-append (assoc-ref inputs "skk-jisyo") "/share/skk/SKK-JISYO.L")))
                                  ))
                     (add-before 'configure 'modify-cmakelists
                                 (lambda _ 
